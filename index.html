@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Innerve 11 — Hunt Till Dawn</title>
+  <link rel="preload" as="image" href="assets/img/chars/muzan.webp" />
+  <meta name="description" content="Innerve 11 — India's largest student-driven hackathon. 24 hours at Army Institute of Technology, Pune. Demon Slayer edition." />
+  <meta name="theme-color" content="#0b0a0c" />
+  <link rel="icon" href="assets/logos/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&family=Shippori+Mincho+B1:wght@800&family=Yuji+Syuku&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ============ SVG DEFS (patterns + reusable art) ============ -->
+<svg class="defs" aria-hidden="true" width="0" height="0">
+  <defs>
+    <!-- Tanjiro ichimatsu checker -->
+    <pattern id="p-ichimatsu" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="#0b0a0c"/><rect width="20" height="20" fill="#1f6b4a"/><rect x="20" y="20" width="20" height="20" fill="#1f6b4a"/>
+    </pattern>
+    <!-- Insect — butterfly wing -->
+    <linearGradient id="g-insect" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#b9a3e3"/><stop offset=".55" stop-color="#6fc3c0"/><stop offset="1" stop-color="#2b2140"/></linearGradient>
+    <pattern id="p-insect" width="120" height="120" patternUnits="userSpaceOnUse">
+      <rect width="120" height="120" fill="url(#g-insect)"/>
+      <path d="M0 120 L60 0 M30 120 L90 0 M60 120 L120 0 M0 60 Q60 40 120 60" stroke="#120c1c" stroke-width="2" fill="none" opacity=".7"/>
+    </pattern>
+    <!-- Mist -->
+    <pattern id="p-mist" width="80" height="40" patternUnits="userSpaceOnUse">
+      <rect width="80" height="40" fill="#cfe7e1"/>
+      <path d="M0 40 a20 20 0 0 1 40 0 a20 20 0 0 1 40 0 M10 40 a10 10 0 0 1 20 0 M50 40 a10 10 0 0 1 20 0 M-20 20 a20 20 0 0 1 40 0 M20 20 a20 20 0 0 1 40 0 M60 20 a20 20 0 0 1 40 0" stroke="#5f8f86" stroke-width="2" fill="none"/>
+    </pattern>
+    <!-- Flame -->
+    <pattern id="p-flame" width="60" height="90" patternUnits="userSpaceOnUse">
+      <rect width="60" height="90" fill="#f5c542"/>
+      <path d="M0 90 C10 60 0 40 15 15 C18 40 30 45 30 20 C40 45 55 50 45 0 C70 30 62 70 60 90 Z" fill="#e2401c"/>
+      <path d="M12 90 C18 70 14 55 22 45 C26 62 36 60 36 48 C46 62 50 78 46 90 Z" fill="#f08a1f"/>
+    </pattern>
+    <!-- Sound — gems -->
+    <pattern id="p-sound" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="#14111a"/>
+      <path d="M20 4 L34 20 L20 36 L6 20 Z" fill="none" stroke="#d6a640" stroke-width="2"/>
+      <circle cx="20" cy="20" r="4" fill="#d6a640"/>
+    </pattern>
+    <!-- Stone -->
+    <pattern id="p-stone" width="80" height="40" patternUnits="userSpaceOnUse">
+      <rect width="80" height="40" fill="#5b5148"/>
+      <path d="M0 0 H80 M0 20 H80 M20 0 V20 M60 0 V20 M0 20 V40 M40 20 V40 M80 20 V40" stroke="#2c2621" stroke-width="3"/>
+    </pattern>
+    <!-- Serpent — stripes -->
+    <pattern id="p-serpent" width="28" height="28" patternUnits="userSpaceOnUse" patternTransform="rotate(90)">
+      <rect width="28" height="28" fill="#efe8dc"/><rect width="14" height="28" fill="#0b0a0c"/>
+    </pattern>
+    <!-- Love — shippō interlocking circles (chain) -->
+    <pattern id="p-love" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="#f2a9c4"/>
+      <g fill="none" stroke="#3f8f5a" stroke-width="2.5"><circle cx="0" cy="0" r="20"/><circle cx="40" cy="0" r="20"/><circle cx="0" cy="40" r="20"/><circle cx="40" cy="40" r="20"/><circle cx="20" cy="20" r="20"/></g>
+    </pattern>
+    <!-- Wind -->
+    <pattern id="p-wind" width="60" height="60" patternUnits="userSpaceOnUse">
+      <rect width="60" height="60" fill="#e9efe9"/>
+      <path d="M-5 50 Q20 30 65 10 M-5 30 Q15 18 40 8 M20 62 Q40 48 65 40" stroke="#2f6b3c" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </pattern>
+    <!-- Water — Giyu half & half (kikkō hex) -->
+    <pattern id="p-hex" width="34" height="58.9" patternUnits="userSpaceOnUse">
+      <rect width="34" height="58.9" fill="#d6b53a"/>
+      <path d="M17 0 L34 9.8 L34 29.4 L17 39.3 L0 29.4 L0 9.8 Z M17 39.3 V58.9 M0 29.4 L-0 49 M34 29.4 V49" fill="#2c6e49" stroke="#1d2b26" stroke-width="2"/>
+    </pattern>
+    <!-- Zenitsu uroko triangles -->
+    <pattern id="p-uroko" width="40" height="34" patternUnits="userSpaceOnUse">
+      <rect width="40" height="34" fill="#f2c230"/><path d="M0 34 L20 0 L40 34 Z" fill="#fff7d6"/>
+    </pattern>
+    <!-- paper grain -->
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 0"/></filter>
+
+    <!-- Nichirin katana (horizontal, tip to the right) -->
+    <symbol id="katana" viewBox="0 0 1200 120">
+      <!-- handle -->
+      <rect x="18" y="47" width="250" height="26" rx="8" fill="#141016"/>
+      <g fill="none" style="stroke:var(--wrap, #c8102e)" stroke-width="3">
+        <path d="M30 47 L55 73 L80 47 L105 73 L130 47 L155 73 L180 47 L205 73 L230 47 L255 73"/>
+        <path d="M30 73 L55 47 L80 73 L105 47 L130 73 L155 47 L180 73 L205 47 L230 73 L255 47"/>
+      </g>
+      <rect x="10" y="45" width="16" height="30" rx="4" fill="#3a3238"/>
+      <!-- tsuba -->
+      <circle cx="292" cy="60" r="40" fill="#141016" style="stroke:var(--blade, #efe8dc)" stroke-width="3"/>
+      <circle cx="292" cy="60" r="10" style="fill:var(--blade, #efe8dc)"/>
+      <g style="fill:var(--blade, #efe8dc)" opacity=".85"><circle cx="292" cy="32" r="5"/><circle cx="292" cy="88" r="5"/><circle cx="264" cy="60" r="5"/><circle cx="320" cy="60" r="5"/></g>
+      <!-- habaki -->
+      <rect x="334" y="45" width="22" height="30" rx="3" fill="#b8902f"/>
+      <!-- blade -->
+      <path d="M356 46 C620 42 900 34 1150 26 Q1186 28 1194 40 C1120 52 860 61 620 66 C520 69 430 72 356 74 Z" style="fill:var(--blade, #efe8dc)"/>
+      <path d="M370 66 C420 62 440 69 490 64 C540 59 560 66 610 61 C660 56 690 62 740 57 C790 52 820 57 870 52 C920 47 960 50 1010 45 C1060 40 1100 42 1170 36" style="stroke:var(--hamon, #0b0a0c)" stroke-width="2.4" fill="none" opacity=".55"/>
+      <text x="420" y="58" font-family="Shippori Mincho B1, serif" font-size="13" style="fill:var(--hamon, #0b0a0c)" opacity=".75" letter-spacing="4">悪鬼滅殺</text>
+    </symbol>
+
+    <!-- Demon eye -->
+    <symbol id="eye" viewBox="0 0 120 60">
+      <path d="M4 30 Q60 -12 116 30 Q60 72 4 30 Z" fill="#efe8dc" stroke="#0b0a0c" stroke-width="4"/>
+      <circle cx="60" cy="30" r="19" fill="#c8102e" stroke="#0b0a0c" stroke-width="3"/>
+      <circle cx="60" cy="30" r="13" fill="none" stroke="#0b0a0c" stroke-width="1.2" opacity=".6"/>
+      <ellipse cx="60" cy="30" rx="3.6" ry="16" fill="#0b0a0c"/>
+      <path d="M4 30 Q60 -12 116 30" fill="none" stroke="#0b0a0c" stroke-width="7"/>
+      <path d="M10 22 L2 14 M22 14 L18 4 M38 8 L37 -2" stroke="#0b0a0c" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============ LOADER ============ -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader__half loader__half--top"></div>
+  <div class="loader__half loader__half--bot"></div>
+  <div class="loader__inner">
+    <div class="loader__kanji">全集中</div>
+    <div class="loader__label">Total concentration · <span id="loadPct">0</span>%</div>
+    <div class="gate" id="gate">
+      <button class="gate__btn" data-sound="1"><span>Enter with sound</span><i>音</i></button>
+      <button class="gate__btn gate__btn--ghost" data-sound="0"><span>Enter in silence</span></button>
+      <p class="gate__hint">Headphones recommended · scroll slowly</p>
+    </div>
+  </div>
+  <div class="loader__slash"></div>
+</div>
+
+<!-- ============ FX LAYERS ============ -->
+<canvas class="fx" id="fx" aria-hidden="true"></canvas>
+<canvas class="trail" id="trail" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="flash" id="flash" aria-hidden="true"></div>
+<canvas class="forms" id="forms" aria-hidden="true"></canvas>
+<div class="slam" id="slam" aria-hidden="true">
+  <div class="slam__wash"></div>
+  <div class="slam__k"></div>
+  <div class="slam__txt">
+    <div class="mask"><div class="slam__line slam__who"></div></div>
+    <div class="mask"><div class="slam__line slam__jp"></div></div>
+    <div class="mask"><div class="slam__line slam__en"></div></div>
+  </div>
+</div>
+<div class="sun" id="sun" aria-hidden="true"><div class="sun__k">日の呼吸</div><div class="sun__en">Hinokami Kagura</div></div>
+
+<!-- ============ HUD ============ -->
+<header class="nav" id="nav">
+  <a href="#top" class="nav__logo" data-scroll aria-label="Innerve 11 home">
+    <span class="nav__mark">滅</span> INNERVE <b>11</b>
+  </a>
+  <nav class="nav__links" aria-label="Primary">
+    <a href="#tracks" data-scroll>Tracks</a>
+    <a href="#prizes" data-scroll>Prizes</a>
+    <a href="#timeline" data-scroll>Timeline</a>
+    <a href="#faq" data-scroll>FAQ</a>
+    <a href="https://drive.google.com/file/d/1a5TeDB4ad3Q-04tBSlanqR1MQgLB5P2H/view?usp=sharing" target="_blank" rel="noopener">Brochure</a>
+  </nav>
+  <div class="nav__right">
+    <button class="snd" id="snd" aria-label="Toggle sound" aria-pressed="false"><i></i><i></i><i></i><i></i><span>Sound</span></button>
+    <a href="#register" class="nav__cta" data-scroll>Register</a>
+  </div>
+</header>
+
+<div class="hud" aria-hidden="true">
+  <div class="hud__frame"><span id="hudNum">01</span><i></i><span id="hudName">The Night</span></div>
+  <div class="hud__rail"><div class="hud__fill" id="hudFill"></div></div>
+</div>
+
+<main id="smooth">
+
+  <!-- ============ 01 HERO — the throne ============ -->
+  <section class="hero" id="top" data-tone="dark" data-name="The Throne">
+    <div class="hero__stage">
+      <div class="hero__bg"></div>
+      <div class="eyes" id="eyes" aria-hidden="true"></div>
+      <div class="eyes" id="eyes0" aria-hidden="true"></div>
+      <svg class="hero__spire" viewBox="0 0 400 900" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+        <g stroke="#efe6ea" stroke-width="14" stroke-linecap="square"><path d="M200 20 V150 M150 45 L250 125 M250 45 L150 125 M140 85 H260"/></g>
+        <path d="M188 150 H212 L236 700 Q300 820 400 900 H0 Q100 820 164 700 Z" fill="#efe6ea"/>
+        <path d="M200 170 V860" stroke="#0b0a0c" stroke-width="2" opacity=".35"/>
+      </svg>
+      <svg class="hero__floor" viewBox="0 0 1600 300" preserveAspectRatio="none" aria-hidden="true">
+        <rect width="1600" height="300" fill="#efe6ea"/>
+        <g stroke="#0b0a0c" stroke-width="1.2" opacity=".55">
+          <path d="M800 0 L-800 300 M800 0 L-400 300 M800 0 L0 300 M800 0 L300 300 M800 0 L550 300 M800 0 L800 300 M800 0 L1050 300 M800 0 L1300 300 M800 0 L1600 300 M800 0 L2000 300 M800 0 L2400 300"/>
+          <path d="M0 18 H1600 M0 44 H1600 M0 80 H1600 M0 130 H1600 M0 200 H1600"/>
+        </g>
+      </svg>
+      <div class="hero__throne"><img class="hero__muzan" src="assets/img/chars/muzan.webp" alt="Muzan Kibutsuji seated" /></div>
+
+      <div class="hero__title hero__title--l">
+        <small>Innerve · Hackathon · AIT Pune</small>
+        <h1>INNERVE</h1>
+        <div class="hero__sub">India's largest<br/>student‑driven hackathon</div>
+      </div>
+      <div class="hero__title hero__title--r">
+        <small>Demon Slayer edition</small>
+        <div class="h1">ELEVEN</div>
+        <div class="hero__sub">第十一 · 30–31 Jan 2027</div>
+      </div>
+
+      <div class="hero__foot">
+        <div class="hero__date">
+          <span class="lbl">The hunt begins in</span>
+          <div class="count" id="countdown"><b data-u="d">00</b><i>d</i><b data-u="h">00</b><i>h</i><b data-u="m">00</b><i>m</i><b data-u="s">00</b><i>s</i></div>
+        </div>
+        <div class="hero__scroll">Scroll<span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 02 THE FALL ============ -->
+  <section class="fall" id="fall" data-tone="dark" data-name="The Fall">
+    <div class="fall__stage">
+      <div class="fall__red"></div>
+      <div class="fall__kanji">鬼</div>
+      <div class="fall__lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <img class="fall__hero" src="assets/img/chars/tanjiro-leap.webp" alt="Tanjiro Kamado leaping with his sword" />
+      <h2 class="fall__text">
+        <span class="mask"><span>Every bug</span></span>
+        <span class="mask"><span>falls before dawn.</span></span>
+      </h2>
+      <p class="fall__sub">24 hours. One blade. Ship it before sunrise.</p>
+      <svg class="slash" viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true">
+        <path class="slash__a" pathLength="1" d="M-80 760 C 260 560, 560 700, 860 470 S 1360 120, 1700 210"/>
+        <path class="slash__b" pathLength="1" d="M-80 800 C 300 610, 600 740, 900 520 S 1380 190, 1700 270"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ============ 03 FLAME HASHIRA ============ -->
+  <section class="breath" id="breath" data-tone="red" data-name="Ablaze">
+    <div class="breath__stage">
+      <img class="breath__face" src="assets/img/chars/rengoku-flame.webp" alt="Kyojuro Rengoku, the Flame Hashira" />
+      <div class="breath__copy">
+        <div class="breath__kicker"><span class="mask"><span>Total</span></span></div>
+        <h2 class="breath__title"><span class="mask"><span>Focus.</span></span></h2>
+        <p class="breath__sub">全集中 · Breathe in the problem. Exhale a product.</p>
+      </div>
+      <img class="breath__strike" src="assets/img/chars/zenitsu-strike.webp" alt="Zenitsu Agatsuma mid-strike" />
+      <svg class="speed" viewBox="-50 -50 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+      <div class="breath__wipe"></div>
+    </div>
+  </section>
+
+  <!-- ============ 04 ABOUT ============ -->
+  <section class="about paper" id="about" data-tone="light" data-name="The Corps">
+    <div class="wrap">
+      <div class="eyebrow">Innerve 11 · OSS Club, AIT Pune</div>
+      <h2 class="about__title reveal-lines">
+        <span>Hand‑forged ideas.</span>
+        <span><em>Nichirin‑sharp</em> code.</span>
+      </h2>
+      <div class="about__grid">
+        <p class="about__lead reveal">A 24‑hour offline hackathon with challenging problems, exciting swags and goodies for participants. We also conduct seminars and interactions with industry experts. Innerve 11 welcomes everyone passionate about coding with a keen interest in problem‑solving: students, professionals and hobbyists from diverse backgrounds.</p>
+        <ul class="stats">
+          <li><b data-count="12">0</b><span>Lacs+ prize pool (₹)</span></li>
+          <li><b data-count="24">0</b><span>Hours, non‑stop</span></li>
+          <li><b data-count="9">0</b><span>Breathing styles / tracks</span></li>
+          <li><b>2–4</b><span>Slayers per team</span></li>
+          <li><b>₹0</b><span>Registration fee</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee marquee--red" aria-hidden="true">
+    <div class="marquee__row"><span>鬼滅 ✦ INNERVE 11 ✦ HUNT TILL DAWN ✦ 全集中 ✦ 30–31 JAN 2027 ✦ AIT PUNE ✦ 24 HOURS ✦ ₹12 LACS+ ✦&nbsp;</span><span>鬼滅 ✦ INNERVE 11 ✦ HUNT TILL DAWN ✦ 全集中 ✦ 30–31 JAN 2027 ✦ AIT PUNE ✦ 24 HOURS ✦ ₹12 LACS+ ✦&nbsp;</span></div>
+  </div>
+
+  <!-- ============ 05 TRACKS ============ -->
+  <section class="tracks paper" id="tracks" data-tone="light" data-name="Breathing Styles">
+    <div class="wrap">
+      <div class="eyebrow">Tracks</div>
+      <h2 class="sec-title">Choose your <em>breathing.</em></h2>
+      <p class="tracks__hint">Click a style to unleash its first form <span>↓</span></p>
+    </div>
+    <ol class="tlist" id="tlist"></ol>
+  </section>
+
+  <!-- ============ FRAMES ============ -->
+  <section class="frames" id="frames" data-tone="dark" data-name="Frames">
+    <div class="wrap">
+      <div class="eyebrow">Selected slayers</div>
+      <h2 class="sec-title">Frames from the <em>corps.</em></h2>
+      <div class="fgrid" id="fgrid"></div>
+    </div>
+  </section>
+
+  <div class="marquee marquee--dark" aria-hidden="true">
+    <div class="marquee__row"><span>鬼滅 ✦ INNERVE 11 ✦ HUNT TILL DAWN ✦ 全集中 ✦ 30–31 JAN 2027 ✦ AIT PUNE ✦ 24 HOURS ✦ ₹12 LACS+ ✦&nbsp;</span><span>鬼滅 ✦ INNERVE 11 ✦ HUNT TILL DAWN ✦ 全集中 ✦ 30–31 JAN 2027 ✦ AIT PUNE ✦ 24 HOURS ✦ ₹12 LACS+ ✦&nbsp;</span></div>
+  </div>
+
+  <!-- ============ INFINITY CASTLE (WebGL) ============ -->
+  <section class="castle" id="castle" data-tone="dark" data-name="Infinity Castle">
+    <div class="castle__stage">
+      <canvas id="castleGL" aria-label="A 3D flythrough of the Infinity Castle"></canvas>
+      <div class="castle__vig"></div>
+      <div class="castle__copy">
+        <div class="castle__kicker">無限城 · Mugen-jō</div>
+        <h2 class="castle__title"><span class="mask"><span>Infinity</span></span><span class="mask"><span>Castle.</span></span></h2>
+        <p class="castle__sub">Every room is a problem statement. Six Upper Moons stand between you and dawn.</p>
+      </div>
+      <div class="castle__cap" id="castleCap"><b>上弦の陸</b><span>Upper Six · Daki</span></div>
+      <div class="castle__end">
+        <div class="castle__kicker">The doors open on</div>
+        <div class="castle__bounty">The Bounty</div>
+      </div>
+      <div class="castle__bar"><i id="castleBar"></i></div>
+    </div>
+  </section>
+
+  <!-- ============ 06 PRIZES ============ -->
+  <section class="prizes" id="prizes" data-tone="dark" data-name="The Bounty">
+    <div class="prizes__pin">
+      <div class="eyebrow">Prize pool</div>
+      <div class="prizes__big"><span class="rs">₹</span><span id="poolNum">0</span><span class="lacs">Lacs+</span></div>
+      <p class="prizes__note">Cash, goodies, certificates and a few surprises for those who survive the night.</p>
+    </div>
+    <div class="wrap">
+      <div class="pcards" id="pcards"></div>
+    </div>
+  </section>
+
+  <!-- ============ 07 TIMELINE ============ -->
+  <section class="timeline" id="timeline" data-tone="red" data-name="Final Selection">
+    <div class="timeline__pin">
+      <div class="timeline__head">
+        <div class="eyebrow">Timeline</div>
+        <h2 class="sec-title">The final <em>selection.</em></h2>
+      </div>
+      <div class="timeline__track" id="ttrack">
+        <div class="timeline__line"><svg aria-hidden="true"><use href="#katana"/></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 08 VOICES + ALLIES ============ -->
+  <section class="voices paper" id="voices" data-tone="light" data-name="Survivors">
+    <div class="wrap">
+      <div class="eyebrow">Testimonials</div>
+      <h2 class="sec-title">Words from the <em>survivors.</em></h2>
+      <div class="vgrid" id="vgrid"></div>
+    </div>
+  </section>
+
+  <section class="allies paper" id="allies" data-tone="light" data-name="Allies">
+    <div class="wrap">
+      <div class="eyebrow">Past sponsors</div>
+      <h2 class="sec-title">Allies of the <em>corps.</em></h2>
+      <div class="agrid" id="agrid"></div>
+    </div>
+  </section>
+
+  <!-- ============ 09 FAQ ============ -->
+  <section class="faq" id="faq" data-tone="dark" data-name="Scrolls">
+    <div class="wrap">
+      <div class="eyebrow">FAQs</div>
+      <h2 class="sec-title">Quick answers, <em>slayer.</em></h2>
+      <div class="faq__tabs" role="tablist" id="faqTabs"></div>
+      <div class="faq__list" id="faqList"></div>
+    </div>
+  </section>
+
+  <!-- ============ 10 FINALE ============ -->
+  <section class="finale" id="register" data-tone="dark" data-name="Ablaze">
+    <div class="finale__stage">
+      <div class="hero__bg"></div>
+      <div class="eyes eyes--finale" id="eyes2" aria-hidden="true"></div>
+      <div class="finale__sun"></div>
+      <div class="finale__duo">
+        <img class="finale__nezuko" src="assets/img/chars/nezuko.webp" alt="Nezuko Kamado" />
+        <img class="finale__tanjiro" src="assets/img/chars/tanjiro.webp" alt="Tanjiro Kamado" />
+      </div>
+      <div class="finale__title finale__title--l"><small>The new age of</small><span class="mask"><span>SET YOUR</span></span><span class="mask"><span>HEART</span></span></div>
+      <div class="finale__title finale__title--r"><small>Innerve 11 · 30–31 Jan 2027</small><span class="mask"><span><em>ABLAZE.</em></span></span></div>
+      <div class="finale__cta">
+        <!-- TODO: point this at the Innerve 11 registration page once it is live -->
+        <a class="btn btn--red" href="#register">Register — opens 15 Nov 2026</a>
+        <a class="btn" href="https://drive.google.com/file/d/1a5TeDB4ad3Q-04tBSlanqR1MQgLB5P2H/view?usp=sharing" target="_blank" rel="noopener">Brochure</a>
+      </div>
+    </div>
+    <footer class="foot">
+      <div class="foot__brand">
+        <div class="foot__word">INNERVE <b>11</b></div>
+        <p>India's largest student‑driven hackathon.<br />Organised by the OSS Club, Army Institute of Technology, Pune.</p>
+      </div>
+      <div class="foot__col">
+        <h4>Venue</h4>
+        <p>Army Institute of Technology<br />Dighi Hills, Pune 411015</p>
+        <a href="https://www.google.com/maps/search/?api=1&query=Army+Institute+of+Technology+Pune" target="_blank" rel="noopener">Open in Maps ↗</a>
+      </div>
+      <div class="foot__col">
+        <h4>Navigate</h4>
+        <a href="#tracks" data-scroll>Tracks</a><a href="#prizes" data-scroll>Prizes</a><a href="#timeline" data-scroll>Timeline</a><a href="#faq" data-scroll>FAQ</a>
+      </div>
+      <div class="foot__base">
+        <span>© 2026 Innerve · OSS Club AIT</span>
+        <span>A fan‑made tribute theme. Not affiliated with Demon Slayer, Koyoharu Gotouge or Ufotable. · psst… type <b>hinokami</b></span>
+        <a href="#top" data-scroll>Back to the night ↑</a>
+      </div>
+    </footer>
+  </section>
+</main>
+
+<script type="importmap">
+{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="audio.js"></script>
+<script src="data.js"></script>
+<script src="forms.js"></script>
+<script src="main.js"></script>
+<script type="module" src="fx.js"></script>
+<script type="module" src="castle.js"></script>
+</body>
+</html>

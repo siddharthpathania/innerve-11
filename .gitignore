@@ -1,0 +1,5 @@
+.DS_Store
+*.mov
+# copyrighted music you own stays local — drop it in assets/audio/theme.mp3
+assets/audio/*.mp3
+assets/audio/*.m4a
