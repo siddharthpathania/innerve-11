@@ -7,6 +7,8 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { figureMesh } from "./figure3d.js";
 
 const host = document.getElementById("castleGL");
 const state = (window.CASTLE = window.CASTLE || { progress: 0 });
@@ -15,7 +17,9 @@ const mobile = innerWidth < 700;
 const level = () => (window.SFX && window.SFX.level ? window.SFX.level() : 0);
 
 const renderer = new THREE.WebGLRenderer({ canvas: host, antialias: !mobile, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.25 : 1.5));
+const DPR_MAX = Math.min(devicePixelRatio, mobile ? 1.25 : 1.5);
+let dpr = DPR_MAX;
+renderer.setPixelRatio(dpr);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.1;
@@ -25,6 +29,7 @@ scene.background = new THREE.Color("#0b0407");
 scene.fog = new THREE.FogExp2("#12060b", .026);
 const camera = new THREE.PerspectiveCamera(64, 1, .1, 500);
 
+state.info = renderer.info;
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), .6, .5, .82);
@@ -69,25 +74,23 @@ const plateTex = (txt) => canvasTex(512, 160, (g, w, h) => {
 });
 
 /* ---------- materials ---------- */
+// Lambert keeps per-pixel cost low; everything static is merged below into a few draw calls
 const M = {
-  shoji: new THREE.MeshStandardMaterial({ map: shojiTex, emissive: new THREE.Color("#ff9d4a"), emissiveMap: shojiTex, emissiveIntensity: .45, roughness: .9, side: THREE.DoubleSide }),
-  shojiTall: new THREE.MeshStandardMaterial({ map: shojiTall, emissive: new THREE.Color("#ff8a3a"), emissiveMap: shojiTall, emissiveIntensity: .45, roughness: .9, side: THREE.DoubleSide }),
-  wood: new THREE.MeshStandardMaterial({ map: woodTex, roughness: .5, metalness: .1 }),
-  beam: new THREE.MeshStandardMaterial({ color: "#1d0d08", roughness: .7 }),
-  red: new THREE.MeshStandardMaterial({ color: "#8e0a1f", roughness: .55, emissive: new THREE.Color("#3a0008") }),
-  tatami: new THREE.MeshStandardMaterial({ map: tatamiTex, roughness: .95 }),
-  lantern: new THREE.MeshStandardMaterial({ color: "#ffcf8a", emissive: new THREE.Color("#ff7a1a"), emissiveIntensity: 2.4 })
+  shoji: new THREE.MeshLambertMaterial({ map: shojiTex, emissive: new THREE.Color("#ff9d4a"), emissiveMap: shojiTex, emissiveIntensity: .45, side: THREE.DoubleSide }),
+  shojiTall: new THREE.MeshLambertMaterial({ map: shojiTall, emissive: new THREE.Color("#ff8a3a"), emissiveMap: shojiTall, emissiveIntensity: .45, side: THREE.DoubleSide }),
+  wood: new THREE.MeshLambertMaterial({ map: woodTex }),
+  beam: new THREE.MeshLambertMaterial({ color: "#1d0d08" }),
+  red: new THREE.MeshLambertMaterial({ color: "#8e0a1f", emissive: new THREE.Color("#3a0008") }),
+  tatami: new THREE.MeshLambertMaterial({ map: tatamiTex }),
+  lantern: new THREE.MeshLambertMaterial({ color: "#ffcf8a", emissive: new THREE.Color("#ff7a1a"), emissiveIntensity: 2.4 })
 };
 scene.add(new THREE.HemisphereLight("#ff9a6a", "#1a0610", .5));
 const camLight = new THREE.PointLight("#ffb070", 34, 28, 1.6); scene.add(camLight);
 const demonLight = new THREE.PointLight("#ff1a3c", 0, 14, 1.4); scene.add(demonLight);
 
 const box = (w, h, d, mat) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
-const lanterns = [];
-const lantern = (x, y, z, parent) => {
-  const l = new THREE.Mesh(new THREE.CylinderGeometry(.28, .28, .62, 10), M.lantern.clone());
-  l.position.set(x, y, z); parent.add(l); lanterns.push(l);
-};
+const lanternGeo = new THREE.CylinderGeometry(.28, .28, .62, 10);
+const lantern = (x, y, z, parent) => { const l = new THREE.Mesh(lanternGeo, M.lantern); l.position.set(x, y, z); parent.add(l); };
 
 /* ---------- architecture ---------- */
 const world = new THREE.Group(); scene.add(world);
@@ -123,27 +126,49 @@ for (let y = -8, k = 0; y > -80; y -= 9, k++) {
   lantern(k % 2 ? -SH + .7 : SH - .7, y - 1, SHAFT_Z + (k % 2 ? 1.5 : -1.5), world);
 }
 
-/* ---------- floating rooms in every orientation ---------- */
+/* ---------- bake the static architecture: one draw call per material ---------- */
+{
+  world.updateMatrixWorld(true);
+  const byMat = new Map();
+  world.traverse((o) => {
+    if (!o.isMesh) return;
+    const g = o.geometry.index ? o.geometry.clone() : o.geometry.clone();
+    g.applyMatrix4(o.matrixWorld);
+    if (!byMat.has(o.material)) byMat.set(o.material, []);
+    byMat.get(o.material).push(g);
+  });
+  world.clear();
+  byMat.forEach((geos, mat) => world.add(new THREE.Mesh(mergeGeometries(geos, false), mat)));
+}
+
+/* ---------- floating rooms in every orientation (instanced) ---------- */
 const rooms = new THREE.Group(); scene.add(rooms);
 rooms.position.set(0, -40, -105);
-const roomGeo = new THREE.BoxGeometry(1, 1, 1);
 const rnd = (a, b) => a + Math.random() * (b - a);
+const dummy = new THREE.Object3D();
 const roomMats = [M.shoji, M.wood, M.tatami, M.beam, M.red];
-const roomCount = mobile ? 110 : 220;
-const placeRoom = (m) => {
+const perMat = mobile ? 22 : 44;
+const placeRoom = (inst, i, scale) => {
   const ang = rnd(0, Math.PI * 2), r = rnd(12, 70);
-  m.position.set(Math.cos(ang) * r, rnd(-80, 80), Math.sin(ang) * r * 1.8);
-  m.rotation.set(rnd(-.6, .6) + (Math.random() < .25 ? Math.PI / 2 : 0), rnd(0, Math.PI), rnd(-.6, .6) + (Math.random() < .2 ? Math.PI : 0));
+  dummy.position.set(Math.cos(ang) * r, rnd(-80, 80), Math.sin(ang) * r * 1.8);
+  dummy.rotation.set(rnd(-.6, .6) + (Math.random() < .25 ? Math.PI / 2 : 0), rnd(0, Math.PI), rnd(-.6, .6) + (Math.random() < .2 ? Math.PI : 0));
+  if (scale) dummy.scale.set(rnd(2, 10), rnd(.4, 7), rnd(2, 12)); else dummy.scale.set(1, 1, 1);
+  dummy.updateMatrix(); inst.setMatrixAt(i, dummy.matrix);
 };
-for (let i = 0; i < roomCount; i++) {
-  const m = new THREE.Mesh(roomGeo, roomMats[i % 7 < 3 ? 0 : (i % 5)]);
-  m.scale.set(rnd(2, 10), rnd(.4, 7), rnd(2, 12)); placeRoom(m);
-  m.userData.spin = rnd(-.04, .04); rooms.add(m);
-}
-for (let s = 0; s < 22; s++) {
-  const st = new THREE.Group();
-  for (let k = 0; k < 10; k++) { const b = box(2.4, .3, .9, M.wood); b.position.set(0, k * .45, -k * .8); st.add(b); }
-  placeRoom(st); st.userData.spin = rnd(-.05, .05); rooms.add(st);
+const instanced = [];
+const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+roomMats.forEach((mat, k) => {
+  const n = k === 0 ? perMat * 2 : perMat;
+  const inst = new THREE.InstancedMesh(boxGeo, mat, n);
+  for (let i = 0; i < n; i++) placeRoom(inst, i, true);
+  inst.userData.scaled = true; rooms.add(inst); instanced.push(inst);
+});
+{ // staircases: one merged flight, instanced
+  const steps = [];
+  for (let k = 0; k < 10; k++) { const g = new THREE.BoxGeometry(2.4, .3, .9); g.translate(0, k * .45, -k * .8); steps.push(g); }
+  const stairs = new THREE.InstancedMesh(mergeGeometries(steps), M.wood, 22);
+  for (let i = 0; i < 22; i++) placeRoom(stairs, i, false);
+  rooms.add(stairs); instanced.push(stairs);
 }
 
 /* ---------- camera path ---------- */
@@ -154,21 +179,31 @@ const path = new THREE.CatmullRomCurve3([
   new THREE.Vector3(0, -79.6, -170), new THREE.Vector3(0, -79.6, -203)
 ], false, "centripetal");
 
-/* ---------- Upper Moons ---------- */
-const loader = new THREE.TextureLoader();
+/* ---------- Upper Moons — inflated 2.5D figures that turn and lunge ---------- */
 const demons = [];
 const base = "assets/img/chars/";
+const auraTex = canvasTex(128, 128, (g, w, h) => {
+  const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+  gr.addColorStop(0, "rgba(255,30,60,.9)"); gr.addColorStop(.4, "rgba(200,0,40,.35)"); gr.addColorStop(1, "rgba(0,0,0,0)");
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+});
 const demon = (i, file, rank, x, fy, z, h, onPlatform) => {
   const g = new THREE.Group(); g.position.set(x, fy + h / 2 + .2, z); scene.add(g);
-  const d = { g, i, mesh: null, y0: g.position.y }; demons.push(d);
-  loader.load(file, (tex) => {
-    tex.colorSpace = THREE.SRGBColorSpace;
-    const a = tex.image.width / tex.image.height;
-    const mat = new THREE.MeshBasicMaterial({ map: tex, color: new THREE.Color(.78, .78, .78), transparent: true, alphaTest: .02, fog: false, depthWrite: false, toneMapped: false, opacity: 0 });
-    d.mesh = new THREE.Mesh(new THREE.PlaneGeometry(h * a, h), mat); g.add(d.mesh);
+  const d = { g, i, mesh: null, y0: g.position.y, x0: x, side: Math.sign(x) || 1, lunge: 0, lunged: false, turn: 0 };
+  demons.push(d);
+  const img = new Image();
+  img.onload = () => {
+    const tex = new THREE.Texture(img); tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true; tex.anisotropy = 4;
+    d.mesh = figureMesh(img, tex, { height: h, amount: .16, segments: mobile ? 90 : 130 });
+    d.mesh.material.uniforms.uOpacity.value = 0;
+    d.mesh.material.uniforms.uBright.value = .82;
+    d.mesh.renderOrder = 2; g.add(d.mesh);
     const plate = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .81), new THREE.MeshBasicMaterial({ map: plateTex(rank), transparent: true, depthWrite: false, toneMapped: false, fog: false, opacity: 0 }));
     plate.position.y = h / 2 + .7; g.add(plate); d.plate = plate;
-  });
+    const aura = new THREE.Mesh(new THREE.PlaneGeometry(h * 1.4, h * 1.4), new THREE.MeshBasicMaterial({ map: auraTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false, opacity: 0 }));
+    aura.position.z = -.4; aura.renderOrder = 1; g.add(aura); d.aura = aura;
+  };
+  img.src = file;
   if (onPlatform) { const p = box(3.2, .35, 3.2, M.red); p.position.set(x, fy, z); scene.add(p); }
 };
 demon(0, base + "daki.webp",      "上弦の陸", -2.1, FLOOR_A, -26, 4.4);
@@ -202,7 +237,7 @@ const shift = (dir) => {
   const g = window.gsap;
   const z = rooms.rotation.z + dir * Math.PI / 2, y = rooms.rotation.y + dir * .6;
   if (g) g.to(rooms.rotation, { z, y, duration: .55, ease: "expo.out" }); else rooms.rotation.set(rooms.rotation.x, y, z);
-  rooms.children.forEach((r) => { if (Math.random() < .3) placeRoom(r); });
+  instanced.forEach((inst) => { for (let i = 0; i < inst.count; i++) if (Math.random() < .3) placeRoom(inst, i, inst.userData.scaled); inst.instanceMatrix.needsUpdate = true; });
   shiftKick = 1;
   window.dispatchEvent(new CustomEvent("castle-shift"));
 };
@@ -218,12 +253,12 @@ resize(); addEventListener("resize", resize);
 
 const mouse = { x: 0, y: 0, sx: 0, sy: 0 };
 addEventListener("pointermove", (e) => { mouse.x = e.clientX / innerWidth - .5; mouse.y = e.clientY / innerHeight - .5; });
-let visible = false, smooth = 0, moon = -1;
-new IntersectionObserver(([e]) => (visible = e.isIntersecting), { rootMargin: "200px" }).observe(host);
+let visible = false, smooth = 0, moon = -1, ft = 1 / 60, frames = 0;
+new IntersectionObserver(([e]) => { visible = e.isIntersecting; state.visible = visible; }, { rootMargin: "0px" }).observe(host);
 
 const clock = new THREE.Clock();
 const UP = new THREE.Vector3(0, 1, 0), UP_SHAFT = new THREE.Vector3(0, 0, -1), Z = new THREE.Vector3(0, 0, 1);
-const fwd = new THREE.Vector3(), up = new THREE.Vector3(), tmp = new THREE.Vector3(), m4 = new THREE.Matrix4();
+const fwd = new THREE.Vector3(), up = new THREE.Vector3(), tmp = new THREE.Vector3(), tmp2 = new THREE.Vector3(), m4 = new THREE.Matrix4();
 const qRoll = new THREE.Quaternion(), qLook = new THREE.Quaternion();
 const smoothstep = THREE.MathUtils.smoothstep;
 
@@ -232,7 +267,13 @@ const frame = () => {
   const dt = Math.min(clock.getDelta(), .05);
   if (!visible) return;
   const t = clock.elapsedTime, lv = level();
-  smooth += (state.progress - smooth) * (reduced ? 1 : .07);
+  smooth += (state.progress - smooth) * (reduced ? 1 : 1 - Math.exp(-dt * 6));
+  // adaptive resolution: keep the flythrough fluid on any GPU
+  ft = ft * .92 + dt * .08; frames++;
+  if (frames > 40) {
+    if (ft > .021 && dpr > .6) { dpr = Math.max(.6, dpr * .85); renderer.setPixelRatio(dpr); resize(); frames = 0; }
+    else if (ft < .0135 && dpr < DPR_MAX) { dpr = Math.min(DPR_MAX, dpr * 1.08); renderer.setPixelRatio(dpr); resize(); frames = 0; }
+  }
   const p = smooth;
 
   // biwa shifts when crossing thresholds (either direction)
@@ -262,25 +303,36 @@ const frame = () => {
   camLight.position.copy(camera.position).addScaledVector(fwd, 3);
 
   // world motion
-  rooms.rotation.x += dt * .01;
-  rooms.children.forEach((r) => { r.rotation.x += r.userData.spin * dt * 6; });
-  lanterns.forEach((l, i) => { l.material.emissiveIntensity = 2 + Math.sin(t * 9 + i * 1.7) * .25 + Math.sin(t * 23 + i) * .15 + lv * 1.5; });
+  rooms.rotation.x += dt * .012;
+  M.lantern.emissiveIntensity = 2 + Math.sin(t * 9) * .25 + Math.sin(t * 23) * .15 + lv * 1.5;
   M.shoji.emissiveIntensity = M.shojiTall.emissiveIntensity = .42 + lv * .3 + shiftKick * .35;
   dustMat.size = .08 + lv * .12;
 
-  // demons: billboard, fade in, plates, nearest -> caption + red light
+  // demons: face you (with a 3D turn as you pass), breathe, flutter, lunge when close
   let near = -1, nd = 1e9;
   demons.forEach((d) => {
     if (!d.mesh) return;
-    d.g.quaternion.copy(camera.quaternion);
     const dist = camera.position.distanceTo(d.g.position);
-    const o = smoothstep(dist, 1.6, 4.5) * (1 - smoothstep(dist, 36, 64));
-    d.mesh.material.opacity = o; d.plate.material.opacity = o * (.8 + Math.sin(t * 4 + d.i) * .2);
-    d.g.position.y = d.y0 + Math.sin(t * 1.4 + d.i) * .12;
+    const o = smoothstep(dist, 1.4, 4) * (1 - smoothstep(dist, 36, 64));
+    const u = d.mesh.material.uniforms;
+    u.uOpacity.value = o; u.uTime.value = t + d.i * 3; u.uPulse.value = lv + d.lunge;
+    u.uLight.value.set(-d.side * .6, .5, 1);
+    d.plate.material.opacity = o * (.8 + Math.sin(t * 4 + d.i) * .2);
+    // turn: billboard to camera, then rotate away/toward as you pass so the volume shows
+    const prox = 1 - smoothstep(dist, 3, 26);
+    d.turn += ((d.side * -.75 * prox) - d.turn) * (1 - Math.exp(-dt * 4));
+    d.g.quaternion.copy(camera.quaternion); d.g.rotateY(d.turn);
+    // lunge once when you get close
+    if (!d.lunged && dist < 9) { d.lunged = true; window.SFX && window.SFX.play("whoosh"); if (window.gsap) window.gsap.timeline().to(d, { lunge: 1, duration: .22, ease: "power3.out" }).to(d, { lunge: 0, duration: .9, ease: "power2.inOut" }); }
+    if (dist > 30) d.lunged = false;
+    tmp.subVectors(camera.position, d.g.position).normalize();
+    d.g.position.set(d.x0, d.y0 + Math.sin(t * 1.4 + d.i) * .12, d.g.position.z).addScaledVector(tmp, d.lunge * 1.6);
+    d.aura.material.opacity = o * (.35 + lv * .5 + d.lunge * .8 + Math.sin(t * 3 + d.i) * .08);
+    d.aura.scale.setScalar(1 + d.lunge * .4 + Math.sin(t * 2 + d.i) * .04);
     if (dist < 24 && dist < nd) { nd = dist; near = d.i; }
   });
   if (near !== moon) { moon = near; window.dispatchEvent(new CustomEvent("castle-moon", { detail: moon })); }
-  if (near >= 0) { demonLight.position.copy(demons.find((d) => d.i === near).g.position).add(tmp.set(0, 1, 2)); demonLight.intensity += (30 - demonLight.intensity) * .1; }
+  if (near >= 0) { demonLight.position.copy(demons.find((d) => d.i === near).g.position).add(tmp2.set(0, 1, 2)); demonLight.intensity += (30 - demonLight.intensity) * .1; }
   else demonLight.intensity *= .9;
 
   // doors

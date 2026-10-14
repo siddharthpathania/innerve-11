@@ -371,7 +371,7 @@
     .to(eyes2, { scaleY: .02, duration: .12, stagger: { each: .002, from: "edges" }, ease: "power2.in" }, .3)
     .to("#eyes2", { opacity: 0, duration: .04 }, .44)
     .fromTo(".finale__sun", { scale: .1 }, { scale: 1, duration: .3, ease: "power2.out" }, .4)
-    .from(".finale__duo img", { yPercent: 60, opacity: 0, stagger: .08, duration: .25, ease: "power3.out" }, .48)
+    .from(".finale__duo .fig", { yPercent: 60, opacity: 0, stagger: .08, duration: .25, ease: "power3.out" }, .48)
     .call(() => SFX.play("eyes"), null, .01)
     .call(() => SFX.play("gong"), null, .45)
     .from(".finale__title .ch", { yPercent: 120, rotation: 10, stagger: .008, duration: .14, ease: "power3.out" }, .6)

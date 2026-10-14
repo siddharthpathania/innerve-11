@@ -106,7 +106,7 @@ body[data-tone="red"] .nav__mark { background: var(--ink); }
 .hero__floor { position: absolute; left: 0; right: 0; bottom: 0; height: 24%; width: 100%; z-index: 2; }
 .hero__throne { position: absolute; left: 0; right: 0; bottom: -3%; height: 72%; z-index: 3; display: flex; justify-content: center; pointer-events: none; }
 .hero__muzan {
-  height: 100%; width: auto; max-width: none;
+  position: relative; height: 100%; width: auto; max-width: none;
   filter: grayscale(1) contrast(1.35) brightness(.95) drop-shadow(0 30px 40px rgba(0,0,0,.6));
 }
 .hero__title { position: absolute; top: 18%; z-index: 6; }
@@ -302,7 +302,7 @@ body[data-tone="red"] .nav__mark { background: var(--ink); }
 .finale__stage { height: 100vh; height: 100svh; position: relative; overflow: hidden; }
 .finale__sun { position: absolute; left: 50%; top: 52%; width: min(62vw, 74vh); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle at 40% 40%, #e0142f, var(--red) 50%, var(--red-2)); box-shadow: 0 0 200px 40px rgba(200,16,46,.3); z-index: 2; }
 .finale__duo { position: absolute; left: 50%; bottom: 0; height: 80%; transform: translateX(-50%); display: flex; align-items: flex-end; z-index: 3; }
-.finale__duo img { height: 100%; width: auto; filter: drop-shadow(0 20px 40px rgba(0,0,0,.5)); }
+.finale__duo .fig { position: relative; height: 100%; width: auto; filter: drop-shadow(0 20px 40px rgba(0,0,0,.5)); }
 .finale__nezuko { height: 90% !important; margin-right: -6%; }
 .finale__title { position: absolute; top: 16%; z-index: 4; font-family: var(--f-display); text-transform: uppercase; font-size: clamp(54px, 9vw, 170px); line-height: .84; }
 .finale__title small { display: block; font-family: var(--f-body); font-size: 11px; letter-spacing: .3em; font-weight: 600; opacity: .75; margin-bottom: 12px; }
@@ -474,3 +474,8 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 59; pointer-event
 html.hinokami { --red: #ff5a1f; --red-2: #9a2200; }
 html.hinokami .hero__muzan { filter: grayscale(1) contrast(1.35) sepia(1) hue-rotate(-20deg) saturate(3) brightness(.95); }
 html.hinokami .fall__red, html.hinokami .breath, html.hinokami .timeline { filter: hue-rotate(18deg) saturate(1.2); }
+
+/* ===== v5 — 2.5D figures ===== */
+.fig > img { display: block; height: 100%; width: auto; max-width: none; }
+.fig.is-3d > img { visibility: hidden; }
+.fig__gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }

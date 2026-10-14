@@ -12,6 +12,24 @@ if (!reduced) {
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
+  // a real sakura/wisteria petal: notched tip, pale-to-deep gradient, centre vein
+  const petalCanvas = document.createElement("canvas"); petalCanvas.width = petalCanvas.height = 128;
+  {
+    const g = petalCanvas.getContext("2d");
+    g.translate(64, 64);
+    const path = new Path2D("M0 56 C-30 40 -40 6 -30 -22 C-22 -44 -10 -54 -4 -56 L0 -44 L4 -56 C10 -54 22 -44 30 -22 C40 6 30 40 0 56 Z");
+    const gr = g.createLinearGradient(0, 56, 0, -56);
+    gr.addColorStop(0, "#c2185b"); gr.addColorStop(.18, "#f48fb1"); gr.addColorStop(.6, "#ffd1e3"); gr.addColorStop(1, "#fff4f8");
+    g.fillStyle = gr; g.fill(path);
+    g.globalCompositeOperation = "source-atop";
+    const sh = g.createRadialGradient(-12, -6, 4, 0, 0, 70); sh.addColorStop(0, "rgba(255,255,255,.45)"); sh.addColorStop(1, "rgba(120,0,40,.25)");
+    g.fillStyle = sh; g.fillRect(-64, -64, 128, 128);
+    g.strokeStyle = "rgba(170,20,80,.35)"; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(0, 52); g.quadraticCurveTo(-2, 0, 0, -40); g.stroke();
+    g.lineWidth = 1; g.beginPath(); g.moveTo(0, 30); g.quadraticCurveTo(-14, 6, -16, -18); g.moveTo(0, 30); g.quadraticCurveTo(14, 6, 16, -18); g.stroke();
+  }
+  const petalTex = new THREE.CanvasTexture(petalCanvas);
+
   const N = innerWidth < 700 ? 260 : 620;
   const seeds = new Float32Array(N * 4);
   for (let i = 0; i < N * 4; i++) seeds[i] = Math.random();
@@ -24,7 +42,7 @@ if (!reduced) {
     uDir: { value: 1 }, uSpeed: { value: .05 }, uSize: { value: 3 }, uPetal: { value: 0 },
     uColA: { value: new THREE.Color("#efe8dc") }, uColB: { value: new THREE.Color("#9b8f9a") },
     uAlpha: { value: .45 }, uMouse: { value: new THREE.Vector2(9, 9) }, uVel: { value: 0 },
-    uPR: { value: renderer.getPixelRatio() }, uPulse: { value: 0 }
+    uPR: { value: renderer.getPixelRatio() }, uPulse: { value: 0 }, uPetalTex: { value: petalTex }
   };
   const mat = new THREE.ShaderMaterial({
     uniforms, transparent: true, depthWrite: false,
@@ -32,7 +50,7 @@ if (!reduced) {
       attribute vec4 seed;
       uniform float uTime, uAspect, uDir, uSpeed, uSize, uVel, uPR, uPetal, uPulse;
       uniform vec2 uMouse;
-      varying float vMix; varying float vRot; varying float vFade;
+      varying float vMix; varying float vRot; varying float vFade; varying float vFlip;
       void main() {
         float sp = uSpeed * (0.45 + seed.z);
         float y = fract(seed.y + uDir * (uTime * sp + uVel * 0.15 * seed.w)) * 2.4 - 1.2;
@@ -42,22 +60,31 @@ if (!reduced) {
         float dist = length(d);
         p += normalize(d + 1e-4) * smoothstep(0.28, 0.0, dist) * 0.12 / vec2(uAspect, 1.0);
         gl_Position = vec4(p, 0.0, 1.0);
-        gl_PointSize = uSize * (0.5 + seed.w * 1.6) * uPR * (1.0 + uPetal * 1.4) * (1.0 + uPulse * (0.6 + seed.z));
+        gl_PointSize = uSize * (0.5 + seed.w * 1.6) * uPR * (1.0 + uPetal * 1.6) * (1.0 + uPulse * (0.6 + seed.z));
         vMix = seed.z; vRot = uTime * (seed.x - 0.5) * 3.0 + seed.y * 6.28;
         vFade = smoothstep(1.2, 0.85, abs(y));
+        vFlip = cos(uTime * (1.2 + seed.w * 2.5) + seed.x * 6.28);   // petals tumble
       }`,
     fragmentShader: /* glsl */`
-      uniform vec3 uColA, uColB; uniform float uAlpha, uPetal;
-      varying float vMix; varying float vRot; varying float vFade;
+      uniform vec3 uColA, uColB; uniform float uAlpha, uPetal; uniform sampler2D uPetalTex;
+      varying float vMix; varying float vRot; varying float vFade; varying float vFlip;
       void main() {
         vec2 uv = gl_PointCoord - 0.5;
         float c = cos(vRot), s = sin(vRot);
         uv = mat2(c, -s, s, c) * uv;
-        uv.x *= mix(1.0, 2.1, uPetal);              // petals are elongated
+        // soft ember / ash disc
         float d = length(uv);
-        float a = smoothstep(0.5, 0.0, d);
-        a = mix(a * a, smoothstep(0.5, 0.42, d), uPetal);
-        gl_FragColor = vec4(mix(uColA, uColB, vMix), a * uAlpha * vFade);
+        float disc = smoothstep(0.5, 0.0, d); disc *= disc;
+        vec4 ember = vec4(mix(uColA, uColB, vMix), disc);
+        // petal: sample the drawn petal, squashed by the tumble so it flips in 3D
+        float flip = max(abs(vFlip), 0.12);
+        vec2 pu = vec2(uv.x / flip, uv.y) + 0.5;
+        vec4 pt = texture2D(uPetalTex, pu);
+        pt.a *= step(0.0, pu.x) * step(pu.x, 1.0);
+        vec3 tint = mix(vec3(1.0), mix(uColA, uColB, vMix) * 1.25, 0.45) * (0.75 + 0.25 * flip);   // back side darker
+        vec4 petal = vec4(pt.rgb * tint, pt.a);
+        vec4 col = mix(ember, petal, uPetal);
+        gl_FragColor = vec4(col.rgb, col.a * uAlpha * vFade);
       }`
   });
   scene.add(new THREE.Points(geo, mat));
@@ -75,7 +102,7 @@ if (!reduced) {
   const MODES = {
     dark:  { dir: 1,  speed: .035, size: 3.2, petal: 0, a: "#efe8dc", b: "#7d6f7b", alpha: .4 },
     red:   { dir: 1,  speed: .11,  size: 4.2, petal: 0, a: "#ffd23a", b: "#ff6a00", alpha: .85 },
-    light: { dir: -1, speed: .04, size: 3.6, petal: 1, a: "#b39ae6", b: "#f2a9c4", alpha: .42 }
+    light: { dir: -1, speed: .035, size: 5.2, petal: 1, a: "#c9b2f0", b: "#ffc1d9", alpha: .9 }
   };
   let target = MODES.dark;
   const setMode = (tone) => {
@@ -90,7 +117,7 @@ if (!reduced) {
   new MutationObserver(sync).observe(document.body, { attributes: true, attributeFilter: ["data-tone"] });
   new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
-  let lastY = scrollY, vel = 0, t0 = performance.now();
+  let lastY = scrollY, vel = 0, t0 = performance.now(), hidden = false;
   const loop = (now) => {
     const dt = Math.min(.05, (now - t0) / 1000); t0 = now;
     vel += ((scrollY - lastY) * .02 - vel) * .1; lastY = scrollY;
@@ -98,7 +125,8 @@ if (!reduced) {
     const lv = window.SFX && window.SFX.level ? window.SFX.level() : 0;
     uniforms.uPulse.value += (lv * 1.6 - uniforms.uPulse.value) * .25;
     uniforms.uTime.value += dt * (1 + lv * 2.5);
-    renderer.render(scene, camera);
+    if (window.CASTLE && window.CASTLE.visible) { if (!hidden) { renderer.clear(); hidden = true; } }
+    else { hidden = false; renderer.render(scene, camera); }
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
