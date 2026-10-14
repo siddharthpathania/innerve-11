@@ -1,0 +1,1 @@
+{ "name": "innerve-tools", "private": true, "type": "module", "dependencies": { "@gradio/client": "1.8.0" } }

@@ -8,7 +8,7 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-import { figureMesh } from "./figure3d.js";
+import { loadModel, animateModel } from "./models.js";
 
 const host = document.getElementById("castleGL");
 const state = (window.CASTLE = window.CASTLE || { progress: 0 });
@@ -85,7 +85,7 @@ const M = {
   lantern: new THREE.MeshLambertMaterial({ color: "#ffcf8a", emissive: new THREE.Color("#ff7a1a"), emissiveIntensity: 2.4 })
 };
 scene.add(new THREE.HemisphereLight("#ff9a6a", "#1a0610", .5));
-const camLight = new THREE.PointLight("#ffb070", 34, 28, 1.6); scene.add(camLight);
+const camLight = new THREE.PointLight("#ffb070", 18, 26, 1.6); scene.add(camLight);
 const demonLight = new THREE.PointLight("#ff1a3c", 0, 14, 1.4); scene.add(demonLight);
 
 const box = (w, h, d, mat) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
@@ -181,38 +181,38 @@ const path = new THREE.CatmullRomCurve3([
 
 /* ---------- Upper Moons — inflated 2.5D figures that turn and lunge ---------- */
 const demons = [];
-const base = "assets/img/chars/";
 const auraTex = canvasTex(128, 128, (g, w, h) => {
   const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
   gr.addColorStop(0, "rgba(255,30,60,.9)"); gr.addColorStop(.4, "rgba(200,0,40,.35)"); gr.addColorStop(1, "rgba(0,0,0,0)");
   g.fillStyle = gr; g.fillRect(0, 0, w, h);
 });
-const demon = (i, file, rank, x, fy, z, h, onPlatform) => {
-  const g = new THREE.Group(); g.position.set(x, fy + h / 2 + .2, z); scene.add(g);
-  const d = { g, i, mesh: null, y0: g.position.y, x0: x, side: Math.sign(x) || 1, lunge: 0, lunged: false, turn: 0 };
+// each demon: its generated 3D model if one exists (assets/models), else the official art as a billboard
+const demon = (i, id, rank, x, fy, z, h, onPlatform) => {
+  const g = new THREE.Group(); g.position.set(x, fy + .2, z); scene.add(g);
+  const d = { g, i, h, x0: x, y0: g.position.y, side: Math.sign(x) || 1, lunge: 0, lunged: false, turn: 0, model: null, flat: null };
   demons.push(d);
-  const img = new Image();
-  img.onload = () => {
-    const tex = new THREE.Texture(img); tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true; tex.anisotropy = 4;
-    d.mesh = figureMesh(img, tex, { height: h, amount: .16, segments: mobile ? 90 : 130 });
-    d.mesh.material.uniforms.uOpacity.value = 0;
-    d.mesh.material.uniforms.uBright.value = .82;
-    d.mesh.renderOrder = 2; g.add(d.mesh);
-    const plate = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .81), new THREE.MeshBasicMaterial({ map: plateTex(rank), transparent: true, depthWrite: false, toneMapped: false, fog: false, opacity: 0 }));
-    plate.position.y = h / 2 + .7; g.add(plate); d.plate = plate;
-    const aura = new THREE.Mesh(new THREE.PlaneGeometry(h * 1.4, h * 1.4), new THREE.MeshBasicMaterial({ map: auraTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false, opacity: 0 }));
-    aura.position.z = -.4; aura.renderOrder = 1; g.add(aura); d.aura = aura;
-  };
-  img.src = file;
+  const plate = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .81), new THREE.MeshBasicMaterial({ map: plateTex(rank), transparent: true, depthWrite: false, toneMapped: false, fog: false, opacity: 0 }));
+  plate.position.y = h + .7; g.add(plate); d.plate = plate;
+  const aura = new THREE.Mesh(new THREE.PlaneGeometry(h * 1.5, h * 1.5), new THREE.MeshBasicMaterial({ map: auraTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false, opacity: 0 }));
+  aura.position.set(0, h * .5, -.6); g.add(aura); d.aura = aura;
+  loadModel(id).then((m) => {
+    if (m) { const s = h / m.size.y; m.root.scale.setScalar(s); g.add(m.root); d.model = m; return; }
+    new THREE.TextureLoader().load(`assets/img/chars/${id}.webp`, (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      const a = tex.image.width / tex.image.height;
+      const mat = new THREE.MeshBasicMaterial({ map: tex, color: new THREE.Color(.8, .8, .8), transparent: true, alphaTest: .02, fog: false, depthWrite: false, toneMapped: false, opacity: 0 });
+      d.flat = new THREE.Mesh(new THREE.PlaneGeometry(h * a, h), mat); d.flat.position.y = h / 2; g.add(d.flat);
+    });
+  });
   if (onPlatform) { const p = box(3.2, .35, 3.2, M.red); p.position.set(x, fy, z); scene.add(p); }
 };
-demon(0, base + "daki.webp",      "上弦の陸", -2.1, FLOOR_A, -26, 4.4);
-demon(1, base + "gyokko.webp",    "上弦の伍",  2.1, FLOOR_A, -52, 4.0);
-demon(2, base + "hantengu.webp",  "上弦の肆", -2.0, FLOOR_A, -78, 3.4);
-demon(3, base + "akaza.webp",     "上弦の参",  2.3, -46,     SHAFT_Z, 3.6, true);
-demon(4, base + "doma.webp",      "上弦の弐", -2.2, FLOOR_B, -136, 4.4);
-demon(5, base + "kokushibo.webp", "上弦の壱",  2.1, FLOOR_B, -160, 4.6);
-demon(6, base + "nakime.webp",    "琵琶",     -2.3, FLOOR_B, -190, 4.4);
+demon(0, "daki",      "上弦の陸", -2.1, FLOOR_A, -26, 4.2);
+demon(1, "gyokko",    "上弦の伍",  2.1, FLOOR_A, -52, 3.8);
+demon(2, "hantengu",  "上弦の肆", -2.0, FLOOR_A, -78, 3.2);
+demon(3, "akaza",     "上弦の参",  2.3, -46,     SHAFT_Z, 3.6, true);
+demon(4, "doma",      "上弦の弐", -2.2, FLOOR_B, -136, 4.2);
+demon(5, "kokushibo", "上弦の壱",  2.1, FLOOR_B, -160, 4.4);
+demon(6, "nakime",    "琵琶",     -2.3, FLOOR_B, -190, 4.2);
 
 /* ---------- the final doors ---------- */
 const DOOR_Z = -208, DY = FLOOR_B + 3.2;
@@ -308,31 +308,34 @@ const frame = () => {
   M.shoji.emissiveIntensity = M.shojiTall.emissiveIntensity = .42 + lv * .3 + shiftKick * .35;
   dustMat.size = .08 + lv * .12;
 
-  // demons: face you (with a 3D turn as you pass), breathe, flutter, lunge when close
+  // demons: turn to face you, breathe/sway (models) or billboard (art), lunge when close
   let near = -1, nd = 1e9;
   demons.forEach((d) => {
-    if (!d.mesh) return;
     const dist = camera.position.distanceTo(d.g.position);
+    if (dist > 80) { d.g.visible = false; return; }
+    d.g.visible = true;
     const o = smoothstep(dist, 1.4, 4) * (1 - smoothstep(dist, 36, 64));
-    const u = d.mesh.material.uniforms;
-    u.uOpacity.value = o; u.uTime.value = t + d.i * 3; u.uPulse.value = lv + d.lunge;
-    u.uLight.value.set(-d.side * .6, .5, 1);
     d.plate.material.opacity = o * (.8 + Math.sin(t * 4 + d.i) * .2);
-    // turn: billboard to camera, then rotate away/toward as you pass so the volume shows
+    d.plate.quaternion.copy(camera.quaternion);
     const prox = 1 - smoothstep(dist, 3, 26);
-    d.turn += ((d.side * -.75 * prox) - d.turn) * (1 - Math.exp(-dt * 4));
-    d.g.quaternion.copy(camera.quaternion); d.g.rotateY(d.turn);
-    // lunge once when you get close
+    d.turn += ((d.side * -.6 * prox) - d.turn) * (1 - Math.exp(-dt * 3));
+    if (d.model) {
+      d.g.rotation.set(0, Math.atan2(camera.position.x - d.g.position.x, camera.position.z - d.g.position.z) + d.turn, 0);
+      animateModel(d.model, t + d.i * 2.3, lv + d.lunge);
+    } else if (d.flat) {
+      d.g.quaternion.copy(camera.quaternion); d.g.rotateY(d.turn * .5);
+      d.flat.material.opacity = o;
+    }
     if (!d.lunged && dist < 9) { d.lunged = true; window.SFX && window.SFX.play("whoosh"); if (window.gsap) window.gsap.timeline().to(d, { lunge: 1, duration: .22, ease: "power3.out" }).to(d, { lunge: 0, duration: .9, ease: "power2.inOut" }); }
     if (dist > 30) d.lunged = false;
-    tmp.subVectors(camera.position, d.g.position).normalize();
-    d.g.position.set(d.x0, d.y0 + Math.sin(t * 1.4 + d.i) * .12, d.g.position.z).addScaledVector(tmp, d.lunge * 1.6);
-    d.aura.material.opacity = o * (.35 + lv * .5 + d.lunge * .8 + Math.sin(t * 3 + d.i) * .08);
+    tmp.copy(camera.position).sub(d.g.position).normalize();
+    d.g.position.set(d.x0, d.y0 + Math.sin(t * 1.4 + d.i) * .08, d.g.position.z).addScaledVector(tmp, d.lunge * 1.6);
+    d.aura.material.opacity = o * (.3 + lv * .5 + d.lunge * .8 + Math.sin(t * 3 + d.i) * .08);
     d.aura.scale.setScalar(1 + d.lunge * .4 + Math.sin(t * 2 + d.i) * .04);
     if (dist < 24 && dist < nd) { nd = dist; near = d.i; }
   });
   if (near !== moon) { moon = near; window.dispatchEvent(new CustomEvent("castle-moon", { detail: moon })); }
-  if (near >= 0) { demonLight.position.copy(demons.find((d) => d.i === near).g.position).add(tmp2.set(0, 1, 2)); demonLight.intensity += (30 - demonLight.intensity) * .1; }
+  if (near >= 0) { demonLight.position.copy(demons.find((d) => d.i === near).g.position).add(tmp2.set(0, 1, 2)); demonLight.intensity += (9 - demonLight.intensity) * .1; }
   else demonLight.intensity *= .9;
 
   // doors

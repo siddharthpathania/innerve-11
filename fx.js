@@ -61,6 +61,7 @@ if (!reduced) {
         p += normalize(d + 1e-4) * smoothstep(0.28, 0.0, dist) * 0.12 / vec2(uAspect, 1.0);
         gl_Position = vec4(p, 0.0, 1.0);
         gl_PointSize = uSize * (0.5 + seed.w * 1.6) * uPR * (1.0 + uPetal * 1.6) * (1.0 + uPulse * (0.6 + seed.z));
+        gl_PointSize *= mix(1.0, step(0.4, fract(seed.w * 7.31 + seed.z * 3.7)), uPetal);   // 40% fewer petals
         vMix = seed.z; vRot = uTime * (seed.x - 0.5) * 3.0 + seed.y * 6.28;
         vFade = smoothstep(1.2, 0.85, abs(y));
         vFlip = cos(uTime * (1.2 + seed.w * 2.5) + seed.x * 6.28);   // petals tumble
