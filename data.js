@@ -4,8 +4,11 @@ window.INNERVE = {
 
   // assets/audio/theme.mp3 is a 7-song medley; these are the song start times (seconds).
   // Add titles here to show them in the player, e.g. titles: ["Gurenge", ...]
-  music: { starts: [0, 233.9, 500.4, 773.8, 1038.6, 1296.3, 1477.5], titles: [] },
-  // public site: official music videos (embedded YouTube player — streamed from the official uploads)
+  music: { starts: [0, 233.9, 500.4, 773.8, 1038.6, 1296.3, 1477.5],
+    titles: ["Gurenge — LiSA", "Homura — LiSA", "From the Edge — FictionJunction feat. LiSA", "Akeboshi — LiSA", "Shirogane — LiSA", "Zankyosanka — Aimer", "Asa ga Kuru — Aimer"] },
+  // public site: the same 7-song medley, embedded from YouTube (Kevin Kong's upload); song markers above apply
+  medley: "jBjE8TK7rXQ",
+  // fallback if the medley is unavailable: official music videos (embedded YouTube player)
   youtube: [
     { id: "CwkzK-F0Y00", title: "Gurenge — LiSA" },
     { id: "4DxL6IKmXx4", title: "Homura — LiSA" },
