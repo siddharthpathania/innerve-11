@@ -185,6 +185,9 @@ window.SFX = (() => {
     },
     get hasMusic() { return !!music; },
     get musicEl() { return music; },
+    get hasLocalMusic() { return hasMusic; },
+    // turn the generated ambience down while another music source (YouTube) plays
+    duck(v) { if (ambBus && ctx) ambBus.gain.setTargetAtTime(v, ctx.currentTime, .3); },
     // medley navigation (song start times live in data.js → INNERVE.music.starts)
     track() {
       const st = (window.INNERVE && INNERVE.music && INNERVE.music.starts) || [0];

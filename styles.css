@@ -556,14 +556,37 @@ body[data-tone="light"] .rush line { stroke: var(--ink); }
 .np__btn:hover { color: var(--red); }
 @media (max-width: 640px) { .np__txt i, .np__txt em { display: none; } }
 
-/* ===== v9 — the crow flaps (real cutout split into body + wing) ===== */
-.crow__bird { position: relative; width: 100%; aspect-ratio: 520 / 349; filter: drop-shadow(0 0 1.5px rgba(239,232,220,.7)) drop-shadow(0 10px 16px rgba(0,0,0,.35)); animation: bob .46s ease-in-out infinite; }
-.crow__body, .crow__wing { position: absolute; inset: 0; background: url("assets/img/crow.png") center / 100% 100% no-repeat; }
-.crow__body { clip-path: polygon(0 0, 100% 0, 100% 100%, 57% 100%, 57% 41%, 19% 41%, 19% 100%, 0 100%); }
-.crow__wing { clip-path: polygon(19% 41%, 57% 41%, 57% 100%, 19% 100%); transform-origin: 38% 42%; animation: wingbeat .46s ease-in-out infinite; }
-@keyframes wingbeat { 0%, 100% { transform: scaleY(1) rotate(0deg); } 50% { transform: scaleY(-.78) rotate(-10deg); } }
-@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-9px) rotate(2deg); } }
+/* ===== v9 — the crow soars (real anime cutout) ===== */
+.crow__bird { width: 100%; aspect-ratio: 520 / 349; background: url("assets/img/crow.png") center / contain no-repeat;
+  filter: drop-shadow(0 0 1.5px rgba(239,232,220,.7)) drop-shadow(0 10px 16px rgba(0,0,0,.35));
+  transform-origin: 40% 45%; animation: soar 2.6s ease-in-out infinite; }
+/* two strong wingbeat pulses, then a long glide */
+@keyframes soar {
+  0%   { transform: translateY(0) rotate(-2deg) scale(1, 1); }
+  10%  { transform: translateY(-7px) rotate(0deg) scale(1.02, .9); }
+  20%  { transform: translateY(3px) rotate(1deg) scale(.99, 1.05); }
+  30%  { transform: translateY(-6px) rotate(0deg) scale(1.02, .91); }
+  40%  { transform: translateY(2px) rotate(1.5deg) scale(1, 1.03); }
+  70%  { transform: translateY(6px) rotate(3deg) scale(1, 1); }
+  100% { transform: translateY(0) rotate(-2deg) scale(1, 1); }
+}
 
 /* ===== v10 — perf ===== */
 .fall__hero, .breath__strike, .breath__face, .ftile img, .marquee__row, .trow__art img, .finale__duo .fig { will-change: transform; }
 @media (max-width: 960px) { .grain { display: none; } }
+
+/* ===== v11 — official music player (YouTube embed, public site) ===== */
+.yt { position: fixed; right: calc(var(--gut) + 14px); bottom: 52px; z-index: 48; width: 244px; background: rgba(11,10,12,.92); border: 1px solid rgba(239,232,220,.18); color: var(--paper);
+  box-shadow: 0 20px 50px rgba(0,0,0,.5); transform: translateY(20px); opacity: 0; visibility: hidden; transition: opacity .4s, transform .4s, visibility .4s; }
+.yt.is-on { opacity: 1; visibility: visible; transform: none; }
+.yt__bar { display: flex; align-items: center; gap: 2px; padding: 8px 8px 8px 12px; border-bottom: 1px solid rgba(239,232,220,.12); }
+.yt__now { flex: 1; min-width: 0; font: 600 11px/1.2 var(--f-body); letter-spacing: .06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.yt__now b { color: var(--paper); font-weight: 600; }
+.yt__btn { background: none; border: 0; color: var(--paper); font-size: 13px; padding: 4px 6px; cursor: pointer; opacity: .8; }
+.yt__btn:hover { opacity: 1; color: var(--red); }
+.yt__frame { width: 244px; height: 200px; background: #000; }
+.yt__frame iframe { width: 100%; height: 100%; display: block; border: 0; }
+.yt.is-min .yt__frame { display: none; }
+@media (max-width: 640px) { .yt { right: 12px; bottom: 12px; } }
+.has-music .hud__breath { bottom: 300px; }
+.has-music .yt.is-min ~ * .hud__breath { bottom: 18px; }

@@ -5,6 +5,18 @@ window.INNERVE = {
   // assets/audio/theme.mp3 is a 7-song medley; these are the song start times (seconds).
   // Add titles here to show them in the player, e.g. titles: ["Gurenge", ...]
   music: { starts: [0, 233.9, 500.4, 773.8, 1038.6, 1296.3, 1477.5], titles: [] },
+  // public site: official music videos (embedded YouTube player — streamed from the official uploads)
+  youtube: [
+    { id: "CwkzK-F0Y00", title: "Gurenge — LiSA" },
+    { id: "4DxL6IKmXx4", title: "Homura — LiSA" },
+    { id: "yGcm81aaTHg", title: "Akeboshi — LiSA" },
+    { id: "5whFTc6SaI8", title: "Shirogane — LiSA" },
+    { id: "tLQLa6lM3Us", title: "Zankyosanka — Aimer" },
+    { id: "QORbTrXHpsA", title: "Asa ga Kuru — Aimer" },
+    { id: "Jb6Zlg30rgk", title: "Kizuna no Kiseki — MAN WITH A MISSION × milet" },
+    { id: "vZUyKVE9dus", title: "Koi Kogare — milet × MAN WITH A MISSION" },
+    { id: "1a3b7ZpUcn4", title: "Mugen — MY FIRST STORY × HYDE" }
+  ],
 
   // Tracks mapped to the nine Hashira breathing styles
   tracks: [
