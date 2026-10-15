@@ -136,6 +136,7 @@ window.Forms = (() => {
         .to(slam, { x: 10, duration: .03, yoyo: true, repeat: 5 }, .1)
         .to(slam, { autoAlpha: 0, duration: .5, ease: "power2.in" }, 1.9);
     }
+    window.Impact && setTimeout(() => Impact(track.form === "flame" || track.form === "love"), 60);
     spawn(track.form); t0 = performance.now();
     if (!running) { running = true; requestAnimationFrame(step); }
   };

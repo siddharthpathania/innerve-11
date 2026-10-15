@@ -243,10 +243,11 @@
     gsap.ticker.lagSmoothing(0);
     lenis.stop();
   }
+  window.LENIS = lenis;
   $$("[data-scroll]").forEach((a) => a.addEventListener("click", (e) => {
     const t = $(a.getAttribute("href")); if (!t) return;
     e.preventDefault();
-    lenis ? lenis.scrollTo(t, { duration: 1.8 }) : t.scrollIntoView({ behavior: "smooth" });
+    if (window.Doors) Doors.go(t); else lenis ? lenis.scrollTo(t, { duration: 1.8 }) : t.scrollIntoView({ behavior: "smooth" });
   }));
 
   const vh = (n) => () => (innerHeight * n) / 100;
@@ -266,7 +267,7 @@
     .to(".hero__throne", { scale: 1.12, transformOrigin: "50% 100%", duration: .5, ease: "none" }, .1)
     .to(eyes1, { scaleY: .02, duration: .12, ease: "power2.in", stagger: { each: .002, from: "edges" } }, .62)
     .to("#eyes", { opacity: 0, duration: .05 }, .8)
-    .to(".hero__spire, .hero__floor", { opacity: 0, duration: .12 }, .72)
+    .to(".hero__spire, .hero__floor, .whips", { opacity: 0, duration: .12 }, .72)
     .call(() => flash(.7), null, .86)
     .call(() => SFX.play("whoosh"), null, .8)
     .to(".hero__throne", { scale: 2.4, yPercent: 30, opacity: 0, duration: .25, ease: "power2.in" }, .75);
@@ -289,7 +290,7 @@
     .to(".fall__sub", { opacity: 1, duration: .1 }, .62)
     .to(faller, { x: () => innerWidth * .18, rotation: 4, scale: 1.08, duration: .2, ease: "none" }, .65)
     .to(slashPaths, { strokeDashoffset: 0, duration: .12, stagger: .03, ease: "power2.in" }, .84)
-    .call(() => SFX.play("slash"), null, .86)
+    .call(() => { SFX.play("slash"); window.Impact && Impact(); }, null, .86)
     .call(() => flash(.55), null, .93)
     .to(faller, { x: () => innerWidth * 1.1, y: vh(-50), rotation: 40, duration: .14, ease: "power2.in" }, .86)
     .to(".fall__stage", { x: 8, duration: .02, yoyo: true, repeat: 3, ease: "none" }, .95);
@@ -305,7 +306,7 @@
     .fromTo(".breath__strike", { xPercent: 90, yPercent: 30, rotation: 14, opacity: 0 }, { xPercent: 0, yPercent: 0, rotation: 0, opacity: 1, duration: .22, ease: "power3.out" }, .5)
     .to(".breath__copy", { x: () => -innerWidth * .04, duration: .22 }, .5)
     .to(".breath__strike", { scale: 1.6, xPercent: -30, transformOrigin: "40% 40%", duration: .2, ease: "power2.in" }, .78)
-    .call(() => SFX.play("thunder"), null, .52)
+    .call(() => { SFX.play("thunder"); window.Impact && Impact(); }, null, .52)
     .call(() => SFX.play("whoosh"), null, .78)
     .to(".speed", { opacity: 1, scale: 1.3, duration: .14 }, .78)
     .to(".breath__wipe", { opacity: 1, duration: .1 }, .9);

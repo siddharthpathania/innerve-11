@@ -143,12 +143,17 @@ if (finePointer && !reduced) {
   const pts = [];
   addEventListener("pointermove", (e) => pts.push({ x: e.clientX, y: e.clientY, t: performance.now() }));
   const PAL = { dark: ["rgba(64,170,255,", "rgba(220,245,255,"], light: ["rgba(64,120,255,", "rgba(30,60,140,"], red: ["rgba(255,90,0,", "rgba(255,220,80,"] };
+  // your chosen breathing style recolours the blade (set by clicking a track)
+  const BREATH = { water: ["rgba(64,170,255,", "rgba(220,245,255,"], flame: ["rgba(255,90,0,", "rgba(255,220,80,"], insect: ["rgba(170,120,230,", "rgba(150,230,220,"],
+    mist: ["rgba(160,220,210,", "rgba(255,255,255,"], sound: ["rgba(214,166,64,", "rgba(255,90,120,"], stone: ["rgba(150,140,130,", "rgba(240,230,215,"],
+    serpent: ["rgba(120,80,190,", "rgba(255,255,255,"], love: ["rgba(255,111,168,", "rgba(150,220,140,"], wind: ["rgba(90,200,120,", "rgba(240,255,240,"] };
   const draw = () => {
     const now = performance.now();
     while (pts.length && now - pts[0].t > 220) pts.shift();
     c2.clearRect(0, 0, W, H);
     if (pts.length > 2) {
-      const pal = document.documentElement.classList.contains("hinokami") ? PAL.red : (PAL[document.body.dataset.tone] || PAL.dark);
+      const root = document.documentElement;
+      const pal = root.classList.contains("hinokami") ? PAL.red : BREATH[root.dataset.breath] || PAL[document.body.dataset.tone] || PAL.dark;
       for (let i = 1; i < pts.length; i++) {
         const a = pts[i - 1], b = pts[i];
         const k = i / pts.length, life = 1 - (now - b.t) / 220;

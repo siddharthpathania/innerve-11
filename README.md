@@ -23,6 +23,8 @@ Static site, no build step. GSAP, Lenis and three.js load from CDNs.
 | `fx.js` | Global WebGL particles + nichirin cursor trail |
 | `forms.js` | Breathing-technique cut-ins when you click a track |
 | `audio.js` | Procedural score + SFX (Web Audio), audio-reactive level meter |
+| `game.js` | "Slay the Upper Moons" swipe-to-slice mini-game |
+| `crazy.js` | Impact frames, speed-line rush, biwa door teleports, Muzan's whips, Kasugai crow, kanji scramble, breathing badge |
 
 ## Music
 

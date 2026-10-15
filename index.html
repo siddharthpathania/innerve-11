@@ -130,6 +130,21 @@
 <canvas class="trail" id="trail" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
 <div class="flash" id="flash" aria-hidden="true"></div>
+<div class="impact" id="impact" aria-hidden="true"></div>
+<svg class="rush" id="rush" viewBox="-50 -50 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+<div class="doors" id="doors" aria-hidden="true">
+  <div class="door door--l"></div><div class="door door--r"></div>
+  <div class="doors__seal">無限城</div>
+</div>
+<button class="crow" id="crow" aria-label="Kasugai crow: go to registration">
+  <svg viewBox="0 0 220 120" aria-hidden="true">
+    <g class="crow__wing crow__wing--back"><path d="M110 58 C 90 20, 60 6, 22 4 C 50 22, 70 40, 96 64 Z" fill="#141018"/></g>
+    <path d="M40 66 C 70 50, 120 46, 150 54 C 168 58, 182 54, 192 48 L 212 52 L 194 60 C 186 70, 168 76, 150 74 C 120 80, 80 82, 52 76 L 18 84 L 30 72 Z" fill="#0b0a0c"/>
+    <circle cx="186" cy="52" r="3" fill="#efe8dc"/>
+    <g class="crow__wing crow__wing--front"><path d="M118 60 C 104 26, 80 10, 46 2 C 70 26, 86 46, 104 70 Z" fill="#1d1724"/></g>
+  </svg>
+  <span class="crow__say">CAW!</span>
+</button>
 <canvas class="forms" id="forms" aria-hidden="true"></canvas>
 <div class="slam" id="slam" aria-hidden="true">
   <div class="slam__wash"></div>
@@ -162,6 +177,7 @@
 
 <div class="hud" aria-hidden="true">
   <div class="hud__frame"><span id="hudNum">01</span><i></i><span id="hudName">The Night</span></div>
+  <div class="hud__breath" id="breathBadge"></div>
   <div class="hud__rail"><div class="hud__fill" id="hudFill"></div></div>
 </div>
 
@@ -178,6 +194,7 @@
         <path d="M188 150 H212 L236 700 Q300 820 400 900 H0 Q100 820 164 700 Z" fill="#efe6ea"/>
         <path d="M200 170 V860" stroke="#0b0a0c" stroke-width="2" opacity=".35"/>
       </svg>
+      <canvas class="whips" id="whips" aria-hidden="true"></canvas>
       <svg class="hero__floor" viewBox="0 0 1600 300" preserveAspectRatio="none" aria-hidden="true">
         <rect width="1600" height="300" fill="#efe6ea"/>
         <g stroke="#0b0a0c" stroke-width="1.2" opacity=".55">
@@ -334,6 +351,27 @@
     </div>
   </section>
 
+  <!-- ============ SLAY (mini-game) ============ -->
+  <section class="slay" id="slay" data-tone="dark" data-name="Slay">
+    <div class="wrap slay__head">
+      <div>
+        <div class="eyebrow">Mini‑game · 鬼斬り</div>
+        <h2 class="sec-title">Slay the <em>Upper Moons.</em></h2>
+      </div>
+      <p class="slay__rules">Swipe fast to cut. Combos score double. Never cut <b>Nezuko</b>. You have until dawn: 30 seconds.</p>
+    </div>
+    <div class="slay__stage">
+      <div class="slay__bg" aria-hidden="true">滅</div>
+      <canvas id="slayGL" aria-label="Slay the Upper Moons mini-game"></canvas>
+      <div class="slay__hud"><span>斬 <b id="slayScore">0</b></span><span>夜明け <b id="slayTime">30</b>s</span><span>Best <b id="slayBest">0</b></span></div>
+      <div class="slay__overlay is-on" id="slayOverlay">
+        <div class="slay__rank" id="slayRank"><b>最終選別</b><span>Final Selection</span></div>
+        <p id="slayMsg">Cut as many demons as you can before dawn.</p>
+        <button class="btn btn--red" id="slayStart">Draw your blade</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ 08 VOICES + ALLIES ============ -->
   <section class="voices paper" id="voices" data-tone="light" data-name="Survivors">
     <div class="wrap">
@@ -415,6 +453,8 @@
 <script src="data.js"></script>
 <script src="forms.js"></script>
 <script src="main.js"></script>
+<script src="game.js"></script>
+<script src="crazy.js"></script>
 <script type="module" src="fx.js"></script>
 <script type="module" src="castle.js"></script>
 </body>

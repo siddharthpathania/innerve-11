@@ -479,3 +479,64 @@ html.hinokami .fall__red, html.hinokami .breath, html.hinokami .timeline { filte
 .fig > img { display: block; height: 100%; width: auto; max-width: none; }
 .fig.is-3d > img { visibility: hidden; }
 .fig__gl { position: absolute; display: block; pointer-events: none; }
+
+/* ===== v6 — the crazy layer ===== */
+/* impact frames: two-frame inverted sakuga hit */
+.impact { position: fixed; inset: 0; z-index: 61; pointer-events: none; display: none; }
+.impact.is-a { display: block; -webkit-backdrop-filter: invert(1) grayscale(1) contrast(2.4); backdrop-filter: invert(1) grayscale(1) contrast(2.4); }
+.impact.is-b { display: block; -webkit-backdrop-filter: grayscale(1) contrast(3) brightness(1.2); backdrop-filter: grayscale(1) contrast(3) brightness(1.2); }
+.impact.is-red.is-b { -webkit-backdrop-filter: grayscale(1) sepia(1) hue-rotate(-50deg) saturate(7) contrast(1.8); backdrop-filter: grayscale(1) sepia(1) hue-rotate(-50deg) saturate(7) contrast(1.8); }
+
+/* speed-line rush on fast scroll */
+.rush { position: fixed; inset: -10%; width: 120%; height: 120%; z-index: 44; pointer-events: none; opacity: 0;
+  -webkit-mask-image: radial-gradient(circle, transparent 38%, #000 72%); mask-image: radial-gradient(circle, transparent 38%, #000 72%); }
+.rush line { stroke: var(--paper); }
+body[data-tone="light"] .rush line { stroke: var(--ink); }
+
+/* biwa doors */
+.doors { position: fixed; inset: 0; z-index: 62; pointer-events: none; visibility: hidden; opacity: 0; }
+.door { position: absolute; top: 0; bottom: 0; width: 50.5%;
+  background:
+    linear-gradient(90deg, #1d0d08 0 10px, transparent 10px calc(100% - 10px), #1d0d08 calc(100% - 10px)),
+    repeating-linear-gradient(90deg, transparent 0 calc(25% - 3px), #2a140b calc(25% - 3px) 25%),
+    repeating-linear-gradient(0deg, transparent 0 calc(16.66vh - 3px), #2a140b calc(16.66vh - 3px) 16.66vh),
+    radial-gradient(120% 90% at 50% 50%, #ffe9bd, #d48f45);
+  box-shadow: inset 0 0 0 14px #1d0d08; }
+.door--l { left: 0; } .door--r { right: 0; }
+.doors__seal { position: absolute; left: 50%; top: 50%; translate: -50% -50%; font-family: var(--f-kanji); font-size: clamp(28px, 4vw, 54px); color: var(--paper); background: var(--red); padding: 18px 14px; writing-mode: vertical-rl; letter-spacing: .2em; box-shadow: 0 10px 40px rgba(0,0,0,.4); }
+
+/* Muzan's whips sit behind the throne, over the spire */
+.whips { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+
+/* the crow */
+.crow { position: fixed; left: 0; top: 0; z-index: 47; width: 220px; background: none; border: 0; padding: 0; cursor: pointer; visibility: hidden; opacity: 0; }
+.crow svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 1.5px rgba(239,232,220,.85)) drop-shadow(0 8px 14px rgba(0,0,0,.35)); }
+.crow__wing { transform-box: fill-box; transform-origin: 90% 95%; animation: flap .32s ease-in-out infinite alternate; }
+.crow__wing--back { animation-delay: -.08s; opacity: .85; }
+@keyframes flap { from { transform: rotate(-8deg) scaleY(1); } to { transform: rotate(26deg) scaleY(-.55); } }
+.crow__say { position: absolute; left: 150px; top: -46px; white-space: nowrap; background: var(--paper); color: var(--ink); font: 700 13px/1 var(--f-body); letter-spacing: .04em; padding: 10px 14px; border: 2px solid var(--ink); border-radius: 14px; transform-origin: 0 100%; }
+.crow__say::after { content: ""; position: absolute; left: 16px; bottom: -9px; width: 14px; height: 14px; background: var(--paper); border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(45deg); }
+
+/* breathing badge */
+.hud__breath { position: absolute; right: var(--gut); bottom: 18px; display: flex; align-items: center; gap: 10px; font-size: 11px; letter-spacing: .25em; text-transform: uppercase; font-weight: 600; opacity: 0; transition: opacity .4s; }
+.hud__breath.is-on { opacity: 1; }
+.hud__breath b { font-family: var(--f-brush); font-size: 26px; letter-spacing: 0; color: var(--red); font-weight: 400; }
+
+/* ===== SLAY mini-game ===== */
+.slay { background: var(--ink); padding: clamp(80px, 10vw, 140px) 0 clamp(60px, 8vw, 100px); }
+.slay__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 30px; flex-wrap: wrap; }
+.slay__rules { max-width: 40ch; opacity: .8; }
+.slay__rules b { color: #ff6fa8; }
+.slay__stage { position: relative; height: 78vh; min-height: 480px; margin-top: 36px; overflow: hidden; border-top: 1px solid rgba(239,232,220,.15); border-bottom: 1px solid rgba(239,232,220,.15);
+  background: radial-gradient(60% 70% at 50% 110%, rgba(200,16,46,.35), transparent 70%), radial-gradient(40% 50% at 80% 20%, rgba(239,232,220,.08), transparent), #100b10; }
+.slay__bg { position: absolute; left: 50%; top: 50%; translate: -50% -50%; font-family: var(--f-brush); font-size: 62vh; line-height: 1; color: rgba(239,232,220,.03); pointer-events: none; }
+#slayGL { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.slay__hud { position: absolute; left: var(--gut); right: var(--gut); top: 18px; display: flex; gap: 28px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; font-weight: 600; pointer-events: none; }
+.slay__hud b { font-family: var(--f-display); font-size: 30px; letter-spacing: 0; font-weight: 400; margin-left: 6px; color: var(--paper); }
+.slay__hud span:first-child b { color: var(--red); }
+.slay__overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; background: rgba(11,10,12,.72); opacity: 0; visibility: hidden; transition: opacity .4s, visibility .4s; padding: 0 var(--gut); }
+.slay__overlay.is-on { opacity: 1; visibility: visible; }
+.slay__rank b { display: block; font-family: var(--f-brush); font-size: clamp(60px, 10vw, 150px); line-height: 1; color: var(--red); text-shadow: 0 0 40px rgba(200,16,46,.5); }
+.slay__rank span { font-family: var(--f-display); font-size: clamp(22px, 3vw, 36px); text-transform: uppercase; letter-spacing: .1em; }
+.slay__overlay p { max-width: 46ch; opacity: .85; }
+.slay__overlay p b { color: var(--paper); }
