@@ -118,7 +118,7 @@ if (!reduced) {
   new MutationObserver(sync).observe(document.body, { attributes: true, attributeFilter: ["data-tone"] });
   new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
-  let lastY = scrollY, vel = 0, t0 = performance.now(), hidden = false;
+  let lastY = scrollY, vel = 0, t0 = performance.now(), hidden = false, frameN = 0;
   const loop = (now) => {
     const dt = Math.min(.05, (now - t0) / 1000); t0 = now;
     vel += ((scrollY - lastY) * .02 - vel) * .1; lastY = scrollY;
@@ -127,7 +127,7 @@ if (!reduced) {
     uniforms.uPulse.value += (lv * 1.6 - uniforms.uPulse.value) * .25;
     uniforms.uTime.value += dt * (1 + lv * 2.5);
     if (document.hidden || (window.CASTLE && window.CASTLE.visible) || document.documentElement.classList.contains("is-slaying")) { if (!hidden) { renderer.clear(); hidden = true; } }
-    else { hidden = false; renderer.render(scene, camera); }
+    else if ((frameN = (frameN + 1) % 2) === 0) { hidden = false; renderer.render(scene, camera); }   // 30 fps is plenty for drifting particles
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);

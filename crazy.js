@@ -79,14 +79,13 @@
     addEventListener("pointermove", (e) => { const r = wc.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; mouse.inside = mouse.y > 0 && mouse.y < r.height; });
     let visible = true;
     new IntersectionObserver(([e]) => (visible = e.isIntersecting)).observe(wc);
-    const anchor = (wp) => {
-      const tr = throne.getBoundingClientRect(), wr = wc.getBoundingClientRect();
-      return { x: tr.left - wr.left + tr.width * (.5 + wp.ox * .55), y: tr.top - wr.top + tr.height * (.32 + Math.abs(wp.ox) * .25) };
-    };
+    let tr, wr;   // measured once per frame, not once per whip
+    const anchor = (wp) => ({ x: tr.left - wr.left + tr.width * (.5 + wp.ox * .55), y: tr.top - wr.top + tr.height * (.32 + Math.abs(wp.ox) * .25) });
     const loop = (now) => {
       requestAnimationFrame(loop);
       if (!visible || !W) return;
       const t = now / 1000, seg = H * .03;
+      tr = throne.getBoundingClientRect(); wr = wc.getBoundingClientRect();
       g.clearRect(0, 0, W, H);
       whips.forEach((wp, wi) => {
         const a = anchor(wp);
@@ -149,18 +148,25 @@
       if (!busy) {
         say.textContent = LINES[li++ % LINES.length];
         const y0 = R(.12, .4) * innerHeight;
+        // swoop across: steady glide left with a rolling dip-and-climb path
+        const dur = 8, amp = R(40, 90);
+        const path = { p: 0 };
         gsap.timeline()
-          .set(crow, { autoAlpha: 1, x: innerWidth + 80, y: y0 })
-          .to(crow, { x: -360, duration: 9, ease: "none" })
-          .to(crow, { y: `+=${R(-60, 60)}`, duration: 2.25, yoyo: true, repeat: 3, ease: "sine.inOut" }, 0)
+          .set(crow, { autoAlpha: 1, x: innerWidth + 80, y: y0, rotation: 0 })
+          .to(path, { p: 1, duration: dur, ease: "none", onUpdate: () => {
+            const x = innerWidth + 80 - path.p * (innerWidth + 460);
+            const y = y0 + Math.sin(path.p * Math.PI * 3) * amp;
+            const slope = Math.cos(path.p * Math.PI * 3) * amp * Math.PI * 3 / (innerWidth + 460);
+            gsap.set(crow, { x, y, rotation: Math.atan(slope) * 57 });
+          } }, 0)
           .fromTo(say, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: .35, ease: "back.out(2.5)" }, 1.2)
           .call(() => SFX().play("tick"), null, 1.2)
           .to(say, { opacity: 0, duration: .3 }, 7.2)
           .set(crow, { autoAlpha: 0 });
       }
-      setTimeout(fly, R(42000, 70000));
+      setTimeout(fly, R(30000, 50000));
     };
-    setTimeout(fly, 14000);
+    window.addEventListener("innerve-ready", () => setTimeout(fly, 5000), { once: true });
     crow.addEventListener("click", () => { SFX().play("koto"); const t = $("#register"); t && window.Doors.go(t); });
   }
 

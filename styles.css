@@ -107,7 +107,7 @@ body[data-tone="red"] .nav__mark { background: var(--ink); }
 .hero__throne { position: absolute; left: 0; right: 0; bottom: -3%; height: 72%; z-index: 3; display: flex; justify-content: center; pointer-events: none; }
 .hero__muzan {
   position: relative; height: 100%; width: auto; max-width: none;
-  filter: grayscale(1) contrast(1.35) brightness(.95) drop-shadow(0 30px 40px rgba(0,0,0,.6));
+  will-change: transform;
 }
 .hero__title { position: absolute; top: 18%; z-index: 6; }
 .hero__title--l { left: var(--gut); }
@@ -509,8 +509,6 @@ body[data-tone="light"] .rush line { stroke: var(--ink); }
 
 /* the crow */
 .crow { position: fixed; left: 0; top: 0; z-index: 47; width: 240px; background: none; border: 0; padding: 0; cursor: pointer; visibility: hidden; opacity: 0; }
-.crow__img { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 1.5px rgba(239,232,220,.7)) drop-shadow(0 10px 16px rgba(0,0,0,.35)); transform-origin: 30% 40%; animation: glide 3.2s ease-in-out infinite; }
-@keyframes glide { 0%,100% { transform: rotate(-3deg) translateY(0); } 50% { transform: rotate(4deg) translateY(10px); } }
 .crow__say { position: absolute; left: 30px; top: -40px; white-space: nowrap; background: var(--paper); color: var(--ink); font: 700 13px/1 var(--f-body); letter-spacing: .04em; padding: 10px 14px; border: 2px solid var(--ink); border-radius: 14px; transform-origin: 0 100%; }
 .crow__say::after { content: ""; position: absolute; left: 16px; bottom: -9px; width: 14px; height: 14px; background: var(--paper); border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: rotate(45deg); }
 
@@ -557,3 +555,15 @@ body[data-tone="light"] .rush line { stroke: var(--ink); }
 .np__btn { background: none; border: 0; color: inherit; font-size: 14px; cursor: pointer; padding: 4px 6px; }
 .np__btn:hover { color: var(--red); }
 @media (max-width: 640px) { .np__txt i, .np__txt em { display: none; } }
+
+/* ===== v9 — the crow flaps (real cutout split into body + wing) ===== */
+.crow__bird { position: relative; width: 100%; aspect-ratio: 520 / 349; filter: drop-shadow(0 0 1.5px rgba(239,232,220,.7)) drop-shadow(0 10px 16px rgba(0,0,0,.35)); animation: bob .46s ease-in-out infinite; }
+.crow__body, .crow__wing { position: absolute; inset: 0; background: url("assets/img/crow.png") center / 100% 100% no-repeat; }
+.crow__body { clip-path: polygon(0 0, 100% 0, 100% 100%, 57% 100%, 57% 41%, 19% 41%, 19% 100%, 0 100%); }
+.crow__wing { clip-path: polygon(19% 41%, 57% 41%, 57% 100%, 19% 100%); transform-origin: 38% 42%; animation: wingbeat .46s ease-in-out infinite; }
+@keyframes wingbeat { 0%, 100% { transform: scaleY(1) rotate(0deg); } 50% { transform: scaleY(-.78) rotate(-10deg); } }
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-9px) rotate(2deg); } }
+
+/* ===== v10 — perf ===== */
+.fall__hero, .breath__strike, .breath__face, .ftile img, .marquee__row, .trow__art img, .finale__duo .fig { will-change: transform; }
+@media (max-width: 960px) { .grain { display: none; } }

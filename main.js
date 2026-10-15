@@ -496,6 +496,7 @@
       lenis && lenis.start();
       ScrollTrigger.refresh();
       SFX.play("taiko");
+      window.dispatchEvent(new Event("innerve-ready"));
     });
 
   gsap.to(prog, {

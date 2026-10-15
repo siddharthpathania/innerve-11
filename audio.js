@@ -4,7 +4,7 @@ window.SFX = (() => {
   let ctx = null, master, wet, comp, noiseBuf, analyser, ambBus, on = false, ambientStarted = false;
   let pendingIdx = null, pendingAt = 0;
   let music = null, musicGain = null, hasMusic = false, lvl = 0, lvlAt = 0, tdata = null;
-  const MUSIC_SRC = "assets/audio/theme.mp3";   // drop a track you own here (e.g. the Demon Slayer OST)
+  const MUSIC_SRC = "assets/audio/theme.mp3?v=2";   // drop a track you own here (e.g. the Demon Slayer OST)
   fetch(MUSIC_SRC, { method: "HEAD" }).then((r) => { hasMusic = r.ok && /audio|mpeg|octet/.test(r.headers.get("content-type") || ""); }).catch(() => {});
   const last = {};
   // Miyako-bushi (in) scale on D — the classic koto mode
@@ -199,11 +199,16 @@ window.SFX = (() => {
       const from = pendingIdx != null && performance.now() - pendingAt < 1500 ? pendingIdx : api.track().index;
       const idx = (from + dir + st.length) % st.length;
       pendingIdx = idx; pendingAt = performance.now();
-      const t = ctx.currentTime;
-      musicGain.gain.cancelScheduledValues(t);
-      musicGain.gain.setValueAtTime(0, t);
-      musicGain.gain.linearRampToValueAtTime(.85, t + .7);
-      music.currentTime = st[idx] + .2;
+      const jump = () => {
+        const t = ctx.currentTime;
+        musicGain.gain.cancelScheduledValues(t);
+        musicGain.gain.setValueAtTime(0, t);
+        musicGain.gain.linearRampToValueAtTime(.85, t + .7);
+        music.currentTime = st[idx] + .2;
+        if (on && music.paused) music.play().catch(() => {});
+      };
+      // can't seek before the browser knows the file's length
+      if (music.readyState >= 1) jump(); else music.addEventListener("loadedmetadata", jump, { once: true });
       return idx;
     },
     // 0..1 loudness of everything playing (score + SFX + music) — drives the visuals
