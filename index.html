@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&family=Shippori+Mincho+B1:wght@800&family=Yuji+Syuku&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=202610151435" />
+  <link rel="stylesheet" href="styles.css?v=202610151612" />
 </head>
 <body>
 
@@ -178,8 +178,23 @@
     <div class="np" id="np"><span class="np__txt">♪ <b id="npIdx">01</b><i>/07</i><em id="npTitle"></em></span><button class="np__btn" id="npNext" type="button" aria-label="Next song">⏭</button></div>
     <button class="snd" id="snd" aria-label="Toggle sound" aria-pressed="false"><i></i><i></i><i></i><i></i><span>Sound</span></button>
     <a href="#register" class="nav__cta" data-scroll>Register</a>
+    <button class="nav__menu" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mmenu"><span></span><span></span></button>
   </div>
 </header>
+
+<!-- mobile menu -->
+<div class="mmenu" id="mmenu" aria-hidden="true">
+  <nav class="mmenu__links" aria-label="Mobile">
+    <a href="#tracks" data-scroll><i>01</i>Tracks<b>呼吸</b></a>
+    <a href="#prizes" data-scroll><i>02</i>Prizes<b>賞</b></a>
+    <a href="#timeline" data-scroll><i>03</i>Timeline<b>夜</b></a>
+    <a href="#slay" data-scroll><i>04</i>Play<b>鬼斬り</b></a>
+    <a href="#faq" data-scroll><i>05</i>FAQ<b>問</b></a>
+    <a href="https://drive.google.com/file/d/1a5TeDB4ad3Q-04tBSlanqR1MQgLB5P2H/view?usp=sharing" target="_blank" rel="noopener"><i>06</i>Brochure<b>書</b></a>
+  </nav>
+  <div class="mmenu__music"><span>♪ <b id="mmSong">Gurenge</b></span><button type="button" id="mmNext" aria-label="Next song">Next ⏭</button></div>
+  <a href="#register" class="btn btn--red mmenu__cta" data-scroll>Register — opens 15 Nov 2026</a>
+</div>
 
 <div class="hud" aria-hidden="true">
   <div class="hud__frame"><span id="hudNum">01</span><i></i><span id="hudName">The Night</span></div>
@@ -455,14 +470,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
-<script src="audio.js?v=202610151435"></script>
-<script src="data.js?v=202610151435"></script>
-<script src="forms.js?v=202610151435"></script>
-<script src="main.js?v=202610151435"></script>
-<script src="game.js?v=202610151435"></script>
-<script src="music.js?v=202610151435"></script>
-<script src="crazy.js?v=202610151435"></script>
-<script type="module" src="fx.js?v=202610151435"></script>
-<script type="module" src="castle.js?v=202610151435"></script>
+<script src="audio.js?v=202610151612"></script>
+<script src="data.js?v=202610151612"></script>
+<script src="forms.js?v=202610151612"></script>
+<script src="main.js?v=202610151612"></script>
+<script src="game.js?v=202610151612"></script>
+<script src="music.js?v=202610151612"></script>
+<script src="crazy.js?v=202610151612"></script>
+<script type="module" src="fx.js?v=202610151612"></script>
+<script type="module" src="castle.js?v=202610151612"></script>
 </body>
 </html>

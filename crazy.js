@@ -157,7 +157,8 @@
             const x = innerWidth + 80 - path.p * (innerWidth + 460);
             const y = y0 + Math.sin(path.p * Math.PI * 3) * amp;
             const slope = Math.cos(path.p * Math.PI * 3) * amp * Math.PI * 3 / (innerWidth + 460);
-            gsap.set(crow, { x, y, rotation: Math.atan(slope) * 57 });
+            const rot = Math.atan(slope) * 57;
+            gsap.set(crow, { x, y, rotation: rot }); gsap.set(say, { rotation: -rot });
           } }, 0)
           .fromTo(say, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: .35, ease: "back.out(2.5)" }, 1.2)
           .call(() => SFX().play("tick"), null, 1.2)
@@ -218,5 +219,23 @@
       npTitle.textContent = tr.title;
     };
     setInterval(tickNp, 1000);
+  }
+
+  /* ================= mobile menu ================= */
+  const menuBtn = $("#menuBtn"), mmenu = $("#mmenu");
+  if (menuBtn && mmenu) {
+    const setMenu = (open) => {
+      document.documentElement.classList.toggle("menu-open", open);
+      menuBtn.setAttribute("aria-expanded", open); menuBtn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      mmenu.setAttribute("aria-hidden", !open);
+      if (window.LENIS) open ? LENIS.stop() : LENIS.start();
+      if (open && window.gsap) gsap.from(".mmenu__links a", { y: 40, opacity: 0, stagger: .05, duration: .5, delay: .15, ease: "power3.out" });
+    };
+    menuBtn.addEventListener("click", () => setMenu(!document.documentElement.classList.contains("menu-open")));
+    mmenu.addEventListener("click", (e) => { if (e.target.closest("a")) setMenu(false); }, true);
+    addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
+    const mmNext = $("#mmNext"), mmSong = $("#mmSong");
+    if (mmNext) mmNext.addEventListener("click", () => { const n = $("#npNext"); n && n.click(); setTimeout(() => (mmSong.textContent = ($("#npTitle") || {}).textContent || mmSong.textContent), 700); });
+    setInterval(() => { const t = $("#npTitle"); if (t && t.textContent && mmSong) mmSong.textContent = t.textContent; }, 1500);
   }
 })();

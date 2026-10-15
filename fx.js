@@ -30,7 +30,7 @@ if (!reduced) {
   }
   const petalTex = new THREE.CanvasTexture(petalCanvas);
 
-  const N = innerWidth < 700 ? 180 : 420;
+  const N = innerWidth < 700 ? 120 : 420;
   const seeds = new Float32Array(N * 4);
   for (let i = 0; i < N * 4; i++) seeds[i] = Math.random();
   const geo = new THREE.BufferGeometry();
@@ -109,7 +109,7 @@ if (!reduced) {
   const setMode = (tone) => {
     const m = MODES[tone] || MODES.dark; if (m === target) return; target = m;
     const g = window.gsap; const tw = (o, v) => g ? g.to(o, { value: v, duration: 1.2, ease: "power2.out" }) : (o.value = v);
-    tw(uniforms.uSpeed, m.speed); tw(uniforms.uSize, m.size); tw(uniforms.uPetal, m.petal); tw(uniforms.uAlpha, m.alpha);
+    tw(uniforms.uSpeed, m.speed); tw(uniforms.uSize, m.size * (innerWidth < 700 ? .5 : 1)); tw(uniforms.uPetal, m.petal); tw(uniforms.uAlpha, m.alpha);
     uniforms.uDir.value = m.dir;
     if (g) { g.to(uniforms.uColA.value, { ...hex(m.a), duration: 1.2 }); g.to(uniforms.uColB.value, { ...hex(m.b), duration: 1.2 }); }
   };

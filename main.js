@@ -456,11 +456,22 @@
       trigger: spacer, start: "top 50%", end: "bottom 50%",
       onToggle: (self) => {
         if (!self.isActive) return;
-        document.body.dataset.tone = sec.dataset.tone;
         hudNum.textContent = pad(i + 1);
         hudName.textContent = sec.dataset.name || "";
       }
     });
+  });
+  // nav/cursor colours follow whatever section is under the nav bar (not the middle of the screen)
+  SECTIONS.forEach((sec) => {
+    const spacer = sec.parentElement.classList.contains("pin-spacer") ? sec.parentElement : sec;
+    ScrollTrigger.create({ trigger: spacer, start: "top 32px", end: "bottom 32px",
+      onToggle: (self) => { if (self.isActive) document.body.dataset.tone = sec.dataset.tone; } });
+  });
+  // the Rengoku/Zenitsu scene ends by wiping to paper — switch to the light nav as it does
+  ScrollTrigger.getAll().filter((t) => t.pin && t.trigger && t.trigger.id === "breath").forEach((t) => {
+    t.vars.onUpdate = null;
+    ScrollTrigger.create({ trigger: t.trigger, start: () => t.start + (t.end - t.start) * .9, end: () => t.end + innerHeight,
+      onToggle: (self) => { if (self.isActive) document.body.dataset.tone = "light"; else if (self.direction < 0) document.body.dataset.tone = "red"; } });
   });
   document.body.dataset.tone = "dark";
   gsap.to("#hudFill", { scaleY: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: .3 } });
