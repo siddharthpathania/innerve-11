@@ -8,7 +8,6 @@ import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-import { loadModel, animateModel } from "./models.js";
 
 const host = document.getElementById("castleGL");
 const state = (window.CASTLE = window.CASTLE || { progress: 0 });
@@ -186,23 +185,20 @@ const auraTex = canvasTex(128, 128, (g, w, h) => {
   gr.addColorStop(0, "rgba(255,30,60,.9)"); gr.addColorStop(.4, "rgba(200,0,40,.35)"); gr.addColorStop(1, "rgba(0,0,0,0)");
   g.fillStyle = gr; g.fillRect(0, 0, w, h);
 });
-// each demon: its generated 3D model if one exists (assets/models), else the official art as a billboard
+// each demon: the official art as a billboard
 const demon = (i, id, rank, x, fy, z, h, onPlatform) => {
   const g = new THREE.Group(); g.position.set(x, fy + .2, z); scene.add(g);
-  const d = { g, i, h, x0: x, y0: g.position.y, side: Math.sign(x) || 1, lunge: 0, lunged: false, turn: 0, model: null, flat: null };
+  const d = { g, i, h, x0: x, y0: g.position.y, side: Math.sign(x) || 1, lunge: 0, lunged: false, turn: 0, flat: null };
   demons.push(d);
   const plate = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .81), new THREE.MeshBasicMaterial({ map: plateTex(rank), transparent: true, depthWrite: false, toneMapped: false, fog: false, opacity: 0 }));
   plate.position.y = h + .7; g.add(plate); d.plate = plate;
   const aura = new THREE.Mesh(new THREE.PlaneGeometry(h * 1.5, h * 1.5), new THREE.MeshBasicMaterial({ map: auraTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false, opacity: 0 }));
   aura.position.set(0, h * .5, -.6); g.add(aura); d.aura = aura;
-  loadModel(id).then((m) => {
-    if (m) { const s = h / m.size.y; m.root.scale.setScalar(s); g.add(m.root); d.model = m; return; }
-    new THREE.TextureLoader().load(`assets/img/chars/${id}.webp`, (tex) => {
+  new THREE.TextureLoader().load(`assets/img/chars/${id}.webp`, (tex) => {
       tex.colorSpace = THREE.SRGBColorSpace;
       const a = tex.image.width / tex.image.height;
       const mat = new THREE.MeshBasicMaterial({ map: tex, color: new THREE.Color(.8, .8, .8), transparent: true, alphaTest: .02, fog: false, depthWrite: false, toneMapped: false, opacity: 0 });
       d.flat = new THREE.Mesh(new THREE.PlaneGeometry(h * a, h), mat); d.flat.position.y = h / 2; g.add(d.flat);
-    });
   });
   if (onPlatform) { const p = box(3.2, .35, 3.2, M.red); p.position.set(x, fy, z); scene.add(p); }
 };
@@ -308,7 +304,7 @@ const frame = () => {
   M.shoji.emissiveIntensity = M.shojiTall.emissiveIntensity = .42 + lv * .3 + shiftKick * .35;
   dustMat.size = .08 + lv * .12;
 
-  // demons: turn to face you, breathe/sway (models) or billboard (art), lunge when close
+  // demons: billboards that face you, glow and lunge when close
   let near = -1, nd = 1e9;
   demons.forEach((d) => {
     const dist = camera.position.distanceTo(d.g.position);
@@ -319,10 +315,7 @@ const frame = () => {
     d.plate.quaternion.copy(camera.quaternion);
     const prox = 1 - smoothstep(dist, 3, 26);
     d.turn += ((d.side * -.6 * prox) - d.turn) * (1 - Math.exp(-dt * 3));
-    if (d.model) {
-      d.g.rotation.set(0, Math.atan2(camera.position.x - d.g.position.x, camera.position.z - d.g.position.z) + d.turn, 0);
-      animateModel(d.model, t + d.i * 2.3, lv + d.lunge);
-    } else if (d.flat) {
+    if (d.flat) {
       d.g.quaternion.copy(camera.quaternion); d.g.rotateY(d.turn * .5);
       d.flat.material.opacity = o;
     }
