@@ -20,7 +20,7 @@ const setup = async (wrap) => {
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true }); } catch (e) { return; }
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = +(wrap.dataset.exposure || 1.15);
   renderer.setClearColor(0x000000, 0);
   wrap.appendChild(canvas); wrap.classList.add("is-3d");
 

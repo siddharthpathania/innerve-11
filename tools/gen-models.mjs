@@ -7,7 +7,8 @@ import fs from "fs";
 import path from "path";
 import { execFileSync } from "child_process";
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
+import { fileURLToPath } from "url";
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ORDER = ["muzan", "tanjiro", "nezuko", "zenitsu-strike", "tanjiro-leap", "akaza", "doma", "kokushibo", "daki", "nakime", "hantengu", "gyokko"];
 const names = process.argv.slice(2).length ? process.argv.slice(2) : ORDER;
 const token = process.env.HF_TOKEN;
