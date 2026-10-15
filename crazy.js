@@ -19,7 +19,6 @@
     setTimeout(() => { imp.className = "impact"; }, 150);
     setTimeout(() => (impBusy = false), 450);          // never more than ~2 per second
   };
-  window.addEventListener("castle-shift", () => window.Impact());
 
   /* ================= speed-line rush on fast scroll ================= */
   const rush = $("#rush");

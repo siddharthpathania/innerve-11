@@ -540,3 +540,11 @@ body[data-tone="light"] .rush line { stroke: var(--ink); }
 .slay__rank span { font-family: var(--f-display); font-size: clamp(22px, 3vw, 36px); text-transform: uppercase; letter-spacing: .1em; }
 .slay__overlay p { max-width: 46ch; opacity: .85; }
 .slay__overlay p b { color: var(--paper); }
+
+/* ===== v7 — game access ===== */
+.nav__play { border: 1px solid var(--red); background: var(--red); color: var(--paper); padding: 8px 14px; display: flex; gap: 6px; align-items: center; transition: transform .3s; }
+.nav__play b { font-family: var(--f-kanji); font-weight: 800; letter-spacing: 0; }
+.nav__play:hover { transform: scale(1.05); }
+.slay__exit { margin-left: auto; pointer-events: auto; background: rgba(11,10,12,.6); color: var(--paper); border: 1px solid rgba(239,232,220,.4); padding: 8px 12px; font: 600 11px/1 var(--f-body); letter-spacing: .2em; text-transform: uppercase; cursor: pointer; display: none; }
+.is-slaying .slay__exit { display: block; }
+@media (max-width: 640px) { .nav__play { padding: 7px 10px; } .nav__play b { display: none; } .slay__stage { height: 72vh; } }

@@ -226,8 +226,8 @@ const dustMat = new THREE.PointsMaterial({ color: "#ffb36b", size: .08, transpar
 scene.add(new THREE.Points(dg, dustMat));
 
 /* ---------- biwa shifts: the castle rearranges itself ---------- */
-const SHIFTS = [.14, .3, .5, .7, .84];
-let lastP = 0, shiftKick = 0;
+const SHIFTS = [.18, .42, .66].map((at) => ({ at, armed: true }));
+let lastShift = 0, shiftKick = 0;
 const shift = (dir) => {
   window.SFX && window.SFX.play("biwa");
   const g = window.gsap;
@@ -249,6 +249,7 @@ resize(); addEventListener("resize", resize);
 
 const mouse = { x: 0, y: 0, sx: 0, sy: 0 };
 addEventListener("pointermove", (e) => { mouse.x = e.clientX / innerWidth - .5; mouse.y = e.clientY / innerHeight - .5; });
+let pendingMoon = -1, pendingAt = 0;
 let visible = false, smooth = 0, moon = -1, ft = 1 / 60, frames = 0;
 new IntersectionObserver(([e]) => { visible = e.isIntersecting; state.visible = visible; }, { rootMargin: "0px" }).observe(host);
 
@@ -273,8 +274,11 @@ const frame = () => {
   const p = smooth;
 
   // biwa shifts when crossing thresholds (either direction)
-  SHIFTS.forEach((s) => { if ((lastP < s && p >= s) || (lastP > s && p <= s)) shift(p > lastP ? 1 : -1); });
-  lastP = p;
+  // each shift fires once going forward; it re-arms only after you scroll well back before it
+  SHIFTS.forEach((s) => {
+    if (s.armed && p >= s.at && performance.now() - lastShift > 1500) { s.armed = false; lastShift = performance.now(); shift(1); }
+    else if (!s.armed && p < s.at - .06) s.armed = true;
+  });
   shiftKick *= .92;
 
   // ride the curve
@@ -320,14 +324,15 @@ const frame = () => {
       d.flat.material.opacity = o;
     }
     if (!d.lunged && dist < 9) { d.lunged = true; window.SFX && window.SFX.play("whoosh"); if (window.gsap) window.gsap.timeline().to(d, { lunge: 1, duration: .22, ease: "power3.out" }).to(d, { lunge: 0, duration: .9, ease: "power2.inOut" }); }
-    if (dist > 30) d.lunged = false;
+    if (dist > 45) d.lunged = false;
     tmp.copy(camera.position).sub(d.g.position).normalize();
     d.g.position.set(d.x0, d.y0 + Math.sin(t * 1.4 + d.i) * .08, d.g.position.z).addScaledVector(tmp, d.lunge * 1.6);
     d.aura.material.opacity = o * (.3 + lv * .5 + d.lunge * .8 + Math.sin(t * 3 + d.i) * .08);
     d.aura.scale.setScalar(1 + d.lunge * .4 + Math.sin(t * 2 + d.i) * .04);
     if (dist < 24 && dist < nd) { nd = dist; near = d.i; }
   });
-  if (near !== moon) { moon = near; window.dispatchEvent(new CustomEvent("castle-moon", { detail: moon })); }
+  if (near !== pendingMoon) { pendingMoon = near; pendingAt = performance.now(); }
+  if (pendingMoon !== moon && performance.now() - pendingAt > 350) { moon = pendingMoon; window.dispatchEvent(new CustomEvent("castle-moon", { detail: moon })); }
   if (near >= 0) { demonLight.position.copy(demons.find((d) => d.i === near).g.position).add(tmp2.set(0, 1, 2)); demonLight.intensity += (9 - demonLight.intensity) * .1; }
   else demonLight.intensity *= .9;
 

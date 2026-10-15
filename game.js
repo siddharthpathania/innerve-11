@@ -65,6 +65,7 @@
   const end = (reason) => {
     running = false;
     document.documentElement.classList.remove("is-slaying");
+    window.LENIS && window.LENIS.start();
     const rank = RANKS.find(([n]) => score < n);
     if (score > best) { best = score; try { localStorage.setItem("innerve-slay-best", best); } catch (e) {} bestEl.textContent = best; }
     rankEl.innerHTML = `<b>${rank[1]}</b><span>${rank[2]}</span>`;
@@ -84,9 +85,16 @@
     overlay.classList.remove("is-on", "is-end");
     running = true; last = performance.now();
     document.documentElement.classList.add("is-slaying");
+    // frame the arena and lock page scroll while you play
+    const stage = document.querySelector(".slay__stage");
+    if (window.LENIS) { window.LENIS.scrollTo(stage, { offset: -70, duration: .6, force: true }); setTimeout(() => window.LENIS.stop(), 650); }
     SFX().play("unsheathe");
   };
   startBtn.addEventListener("click", start);
+  document.getElementById("slayExit").addEventListener("click", () => running && end("time"));
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && running) end("time"); });
+  // stop the wheel from scrolling the page out from under you mid-round
+  cv.addEventListener("wheel", (e) => { if (running) e.preventDefault(); }, { passive: false });
 
   /* ---------- the blade ---------- */
   let px = null, py = null, pt = 0, down = false;

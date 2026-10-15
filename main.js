@@ -257,7 +257,7 @@
   const eyes1 = $$("#eyes svg");
   gsap.set(eyes1, { scaleY: .02 });
 
-  gsap.timeline({ scrollTrigger: { trigger: "#top", start: "top top", end: "+=200%", pin: true, scrub: 1, anticipatePin: 1 } })
+  gsap.timeline({ scrollTrigger: { trigger: "#top", start: "top top", end: "+=120%", pin: true, scrub: 1, anticipatePin: 1 } })
     .to(".hero__title--l", { xPercent: -60, opacity: 0, ease: "power2.in", duration: .35 }, 0)
     .to(".hero__title--r", { xPercent: 60, opacity: 0, ease: "power2.in", duration: .35 }, 0)
     .to(".hero__foot", { opacity: 0, y: 40, duration: .15 }, 0)
@@ -278,7 +278,7 @@
   gsap.set(slashPaths, { strokeDasharray: "1 2", strokeDashoffset: 1 });
   gsap.set(faller, { filter: "grayscale(1) brightness(2.4) contrast(0.55) opacity(0.9)" });
 
-  gsap.timeline({ scrollTrigger: { trigger: "#fall", start: "top top", end: "+=280%", pin: true, scrub: 1, anticipatePin: 1 } })
+  gsap.timeline({ scrollTrigger: { trigger: "#fall", start: "top top", end: "+=170%", pin: true, scrub: 1, anticipatePin: 1 } })
     .fromTo(faller, { y: vh(-110), rotation: -150, scale: .7 }, { y: vh(0), rotation: 12, scale: 1, ease: "power1.out", duration: .65 }, 0)
     .fromTo(".fall__lines i", { y: vh(-40) }, { y: vh(150), stagger: .03, duration: .5, ease: "none" }, 0)
     .to(".fall__red", { opacity: 1, ease: "none", duration: .22 }, .32)
@@ -296,7 +296,7 @@
     .to(".fall__stage", { x: 8, duration: .02, yoyo: true, repeat: 3, ease: "none" }, .95);
 
   /* ----- FLAME: close-up → TOTAL FOCUS → strike → speed lines ----- */
-  gsap.timeline({ scrollTrigger: { trigger: "#breath", start: "top top", end: "+=260%", pin: true, scrub: 1, anticipatePin: 1 } })
+  gsap.timeline({ scrollTrigger: { trigger: "#breath", start: "top top", end: "+=150%", pin: true, scrub: 1, anticipatePin: 1 } })
     .fromTo(".breath__face", { scale: 1.1 }, { scale: .36, duration: .38, ease: "power1.inOut" }, 0)
     .to(".breath__face", { opacity: .18, duration: .1 }, .36)
     .call(() => SFX.play("flame"), null, .02)
@@ -316,17 +316,18 @@
   const MOONS = [[0, "上弦の陸", "Upper Six · Daki"], [0, "上弦の伍", "Upper Five · Gyokko"], [0, "上弦の肆", "Upper Four · Hantengu"],
     [0, "上弦の参", "Upper Three · Akaza"], [0, "上弦の弐", "Upper Two · Doma"], [0, "上弦の壱", "Upper One · Kokushibo"], [0, "琵琶", "The Biwa · Nakime"]];
   const capEl = $("#castleCap"), barEl = $("#castleBar");
+  let lastMoonSfx = 0;
   window.addEventListener("castle-moon", (e) => {
     const idx = e.detail;
     if (idx < 0) { gsap.to(capEl, { opacity: 0, x: 20, duration: .3 }); return; }
     capEl.innerHTML = `<b>${MOONS[idx][1]}</b><span>${MOONS[idx][2]}</span>`;
     gsap.fromTo(capEl, { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: .5, ease: "power3.out" });
-    SFX.play(idx === 6 ? "biwa" : "koto");
+    if (performance.now() - lastMoonSfx > 900) { lastMoonSfx = performance.now(); SFX.play(idx === 6 ? "biwa" : "koto"); }
   });
   window.addEventListener("castle-shift", () => flash(.22));
   const castleTl = gsap.timeline({
     scrollTrigger: {
-      trigger: "#castle", start: "top top", end: "+=650%", pin: true, scrub: true, anticipatePin: 1,
+      trigger: "#castle", start: "top top", end: "+=320%", pin: true, scrub: true, anticipatePin: 1,
       onUpdate: (self) => { CASTLE.progress = self.progress; barEl.style.transform = `scaleX(${self.progress})`; }
     }
   });
@@ -340,7 +341,7 @@
 
   /* ----- PRIZES ----- */
   const pool = { v: 0 }, poolEl = $("#poolNum");
-  gsap.timeline({ scrollTrigger: { trigger: ".prizes__pin", start: "top top", end: "+=120%", pin: true, scrub: 1 } })
+  gsap.timeline({ scrollTrigger: { trigger: ".prizes__pin", start: "top top", end: "+=70%", pin: true, scrub: 1 } })
     .from(".prizes__big", { scale: .6, opacity: 0, duration: .3 }, 0)
     .to(pool, { v: 12, duration: .5, ease: "power1.out", onUpdate: () => (poolEl.textContent = Math.round(pool.v)) }, 0)
     .call(() => SFX.play("taiko"), null, .02)
@@ -366,7 +367,7 @@
   /* ----- FINALE: back to the eyes ----- */
   const eyes2 = $$("#eyes2 svg");
   gsap.set(eyes2, { scaleY: .02 });
-  gsap.timeline({ scrollTrigger: { trigger: ".finale__stage", start: "top top", end: "+=170%", pin: true, scrub: 1, anticipatePin: 1 } })
+  gsap.timeline({ scrollTrigger: { trigger: ".finale__stage", start: "top top", end: "+=110%", pin: true, scrub: 1, anticipatePin: 1 } })
     .to("#eyes2", { opacity: 1, duration: .03 }, 0)
     .to(eyes2, { scaleY: 1, duration: .25, stagger: { each: .003, from: "center" }, ease: "power2.out" }, 0)
     .to(eyes2, { scaleY: .02, duration: .12, stagger: { each: .002, from: "edges" }, ease: "power2.in" }, .3)
