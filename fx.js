@@ -8,7 +8,7 @@ const finePointer = matchMedia("(pointer: fine)").matches;
 if (!reduced) {
   const canvas = document.getElementById("fx");
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false, powerPreference: "low-power" });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  renderer.setPixelRatio(1);
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
@@ -30,7 +30,7 @@ if (!reduced) {
   }
   const petalTex = new THREE.CanvasTexture(petalCanvas);
 
-  const N = innerWidth < 700 ? 260 : 620;
+  const N = innerWidth < 700 ? 180 : 420;
   const seeds = new Float32Array(N * 4);
   for (let i = 0; i < N * 4; i++) seeds[i] = Math.random();
   const geo = new THREE.BufferGeometry();
@@ -61,7 +61,7 @@ if (!reduced) {
         p += normalize(d + 1e-4) * smoothstep(0.28, 0.0, dist) * 0.12 / vec2(uAspect, 1.0);
         gl_Position = vec4(p, 0.0, 1.0);
         gl_PointSize = uSize * (0.5 + seed.w * 1.6) * uPR * (1.0 + uPetal * 1.6) * (1.0 + uPulse * (0.6 + seed.z));
-        gl_PointSize *= mix(1.0, step(0.4, fract(seed.w * 7.31 + seed.z * 3.7)), uPetal);   // 40% fewer petals
+        gl_PointSize *= mix(1.0, step(0.47, fract(seed.w * 7.31 + seed.z * 3.7)), uPetal);   // 40% fewer petals
         vMix = seed.z; vRot = uTime * (seed.x - 0.5) * 3.0 + seed.y * 6.28;
         vFade = smoothstep(1.2, 0.85, abs(y));
         vFlip = cos(uTime * (1.2 + seed.w * 2.5) + seed.x * 6.28);   // petals tumble
@@ -126,7 +126,7 @@ if (!reduced) {
     const lv = window.SFX && window.SFX.level ? window.SFX.level() : 0;
     uniforms.uPulse.value += (lv * 1.6 - uniforms.uPulse.value) * .25;
     uniforms.uTime.value += dt * (1 + lv * 2.5);
-    if (window.CASTLE && window.CASTLE.visible) { if (!hidden) { renderer.clear(); hidden = true; } }
+    if (document.hidden || (window.CASTLE && window.CASTLE.visible) || document.documentElement.classList.contains("is-slaying")) { if (!hidden) { renderer.clear(); hidden = true; } }
     else { hidden = false; renderer.render(scene, camera); }
     requestAnimationFrame(loop);
   };
@@ -147,9 +147,12 @@ if (finePointer && !reduced) {
   const BREATH = { water: ["rgba(64,170,255,", "rgba(220,245,255,"], flame: ["rgba(255,90,0,", "rgba(255,220,80,"], insect: ["rgba(170,120,230,", "rgba(150,230,220,"],
     mist: ["rgba(160,220,210,", "rgba(255,255,255,"], sound: ["rgba(214,166,64,", "rgba(255,90,120,"], stone: ["rgba(150,140,130,", "rgba(240,230,215,"],
     serpent: ["rgba(120,80,190,", "rgba(255,255,255,"], love: ["rgba(255,111,168,", "rgba(150,220,140,"], wind: ["rgba(90,200,120,", "rgba(240,255,240,"] };
+  let dirty = false;
   const draw = () => {
     const now = performance.now();
     while (pts.length && now - pts[0].t > 220) pts.shift();
+    if (!pts.length && !dirty) { requestAnimationFrame(draw); return; }   // idle: no work
+    dirty = pts.length > 0;
     c2.clearRect(0, 0, W, H);
     if (pts.length > 2) {
       const root = document.documentElement;

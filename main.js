@@ -391,20 +391,20 @@
 
   /* ----- velocity skew + marquee ----- */
   const skewTargets = $$(".sec-title, .ftile img, .about__title");
-  const skewProxy = { v: 0 };
   const skewSet = skewTargets.map((el) => gsap.quickSetter(el, "skewY", "deg"));
   const marqTweens = $$(".marquee__row").map((row, i) =>
     gsap.fromTo(row, { xPercent: i % 2 ? -50 : 0 }, { xPercent: i % 2 ? 0 : -50, duration: 22, ease: "none", repeat: -1 }));
-  ScrollTrigger.create({
-    start: 0, end: "max",
-    onUpdate: (self) => {
-      const v = gsap.utils.clamp(-6, 6, self.getVelocity() / -350);
-      if (Math.abs(v) > Math.abs(skewProxy.v)) {
-        skewProxy.v = v;
-        gsap.to(skewProxy, { v: 0, duration: .8, ease: "power3.out", overwrite: true, onUpdate: () => skewSet.forEach((f) => f(skewProxy.v)) });
-      }
-      marqTweens.forEach((t) => gsap.to(t, { timeScale: 1 + Math.abs(self.getVelocity()) / 400, duration: .2, overwrite: true, onComplete: () => gsap.to(t, { timeScale: 1, duration: 1 }) }));
-    }
+  // one ticker drives both effects from scroll velocity — no tweens created per scroll event
+  let vel = 0, skew = 0, speed = 1;
+  ScrollTrigger.create({ start: 0, end: "max", onUpdate: (self) => { vel = self.getVelocity(); } });
+  gsap.ticker.add(() => {
+    vel *= .9;
+    const ts = gsap.utils.clamp(-5, 5, vel / -350);
+    const nextSkew = skew + (ts - skew) * .12;
+    if (Math.abs(nextSkew - skew) > .005 || Math.abs(nextSkew) > .01) { skew = Math.abs(nextSkew) < .01 ? 0 : nextSkew; skewSet.forEach((f) => f(skew)); }
+    const ns = 1 + Math.min(4, Math.abs(vel) / 500);
+    speed += (ns - speed) * .08;
+    marqTweens.forEach((t) => t.timeScale(speed));
   });
 
   /* ----- magnetic buttons + 3D tilt ----- */

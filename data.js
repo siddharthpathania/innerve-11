@@ -2,6 +2,10 @@
 window.INNERVE = {
   eventStart: "2027-01-30T09:00:00+05:30",
 
+  // assets/audio/theme.mp3 is a 7-song medley; these are the song start times (seconds).
+  // Add titles here to show them in the player, e.g. titles: ["Gurenge", ...]
+  music: { starts: [0, 233.9, 500.4, 773.8, 1038.6, 1296.3, 1477.5], titles: [] },
+
   // Tracks mapped to the nine Hashira breathing styles
   tracks: [
     { name: "Health", form: "insect", formJp: "蟲の呼吸 · 蝶ノ舞「戯れ」", formEn: "Insect Breathing · Butterfly Dance: Caprice", img: "shinobu", hashira: "Shinobu Kocho",     style: "Insect Breathing",  kanji: "蟲", pat: "p-insect",  desc: "Heal, detect, protect. Tech that keeps people alive." },

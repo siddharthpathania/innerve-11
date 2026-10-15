@@ -6,3 +6,5 @@ assets/audio/*.m4a
 _*.html
 tools/node_modules/
 tools/.cache/
+*.mp3
+*.m4a

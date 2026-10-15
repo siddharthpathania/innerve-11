@@ -30,7 +30,7 @@
 
   let running = false, visible = true, timeLeft = 30, score = 0, combo = 0, lastHit = 0, spawnIn = 0, elapsed = 0;
   let objs = [], pieces = [], drops = [], pops = [], trail = [];
-  let last = performance.now();
+  let last = performance.now(), wasIdle = false;
 
   const spawn = () => {
     const n = 1 + (Math.random() < .35 + elapsed / 60 ? 1 : 0) + (Math.random() < elapsed / 90 ? 1 : 0);
@@ -133,6 +133,9 @@
     requestAnimationFrame(loop);
     let dt = Math.min(.05, (now - last) / 1000); last = now;
     if (!visible) return;
+    const idle = !running && !objs.length && !pieces.length && !drops.length && !pops.length && !trail.length;
+    if (idle) { if (!wasIdle) { g.clearRect(0, 0, W, H); g.drawImage(stain, 0, 0, W, H); wasIdle = true; } return; }
+    wasIdle = false;
     if (running) {
       elapsed += dt; timeLeft -= dt;
       const tl = Math.max(0, Math.ceil(timeLeft));

@@ -32,9 +32,13 @@
       const now = performance.now(), v = Math.abs(scrollY - lastY) / Math.max(1, now - lastT) * 1000;
       lastY = scrollY; lastT = now;
       const target = Math.min(.75, Math.max(0, (v - 1400) / 4000));
+      const was = op;
       op += (target - op) * .15;
-      rush.style.opacity = op.toFixed(3);
-      rush.style.transform = `rotate(${(now / 40) % 360}deg) scale(${1 + op * .2})`;
+      if (op < .004) op = 0;
+      if (op || was) {                                   // only touch the DOM while it's showing
+        rush.style.opacity = op.toFixed(3);
+        rush.style.transform = `rotate(${(now / 40) % 360}deg) scale(${1 + op * .2})`;
+      }
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
@@ -65,7 +69,7 @@
   const wc = $("#whips"), throne = $(".hero__muzan");
   if (wc && throne && !reduced) {
     const g = wc.getContext("2d");
-    let W = 0, H = 0, dpr = Math.min(devicePixelRatio, 2);
+    let W = 0, H = 0, dpr = Math.min(devicePixelRatio, 1.5);
     const size = () => { const r = wc.getBoundingClientRect(); W = r.width; H = r.height; wc.width = W * dpr; wc.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); };
     size(); new ResizeObserver(size).observe(wc);
     const small = innerWidth < 700;
@@ -193,4 +197,20 @@
     const r = e.target.closest(".trow"); if (!r || !window.INNERVE) return;
     setBreath(window.INNERVE.tracks[+r.dataset.i].form, true);
   });
+
+  /* ================= now playing (the Demon Slayer medley) ================= */
+  const npIdx = $("#npIdx"), npTitle = $("#npTitle"), npNext = $("#npNext");
+  if (npNext) {
+    // note: `SFX` in this file is a local getter function; use the engine on window directly
+    npNext.addEventListener("click", () => { const S = window.SFX; if (S && S.hasMusic) { S.nextTrack(1); setTimeout(tickNp, 300); } });
+    const tickNp = () => {
+      const S = window.SFX;
+      if (!S || !S.hasMusic) return;
+      const tr = S.track();
+      npIdx.textContent = String(tr.index + 1).padStart(2, "0");
+      npNext.previousElementSibling.querySelector("i").textContent = "/" + String(tr.count).padStart(2, "0");
+      npTitle.textContent = tr.title;
+    };
+    setInterval(tickNp, 1000);
+  }
 })();

@@ -137,12 +137,7 @@
   <div class="doors__seal">無限城</div>
 </div>
 <button class="crow" id="crow" aria-label="Kasugai crow: go to registration">
-  <svg viewBox="0 0 220 120" aria-hidden="true">
-    <g class="crow__wing crow__wing--back"><path d="M110 58 C 90 20, 60 6, 22 4 C 50 22, 70 40, 96 64 Z" fill="#141018"/></g>
-    <path d="M40 66 C 70 50, 120 46, 150 54 C 168 58, 182 54, 192 48 L 212 52 L 194 60 C 186 70, 168 76, 150 74 C 120 80, 80 82, 52 76 L 18 84 L 30 72 Z" fill="#0b0a0c"/>
-    <circle cx="186" cy="52" r="3" fill="#efe8dc"/>
-    <g class="crow__wing crow__wing--front"><path d="M118 60 C 104 26, 80 10, 46 2 C 70 26, 86 46, 104 70 Z" fill="#1d1724"/></g>
-  </svg>
+  <img src="assets/img/crow.png" alt="" class="crow__img" />
   <span class="crow__say">CAW!</span>
 </button>
 <canvas class="forms" id="forms" aria-hidden="true"></canvas>
@@ -171,6 +166,7 @@
   </nav>
   <div class="nav__right">
     <a href="#slay" class="nav__play" data-scroll>Play <b>鬼斬り</b></a>
+    <div class="np" id="np"><span class="np__txt">♪ <b id="npIdx">01</b><i>/07</i><em id="npTitle"></em></span><button class="np__btn" id="npNext" type="button" aria-label="Next song">⏭</button></div>
     <button class="snd" id="snd" aria-label="Toggle sound" aria-pressed="false"><i></i><i></i><i></i><i></i><span>Sound</span></button>
     <a href="#register" class="nav__cta" data-scroll>Register</a>
   </div>

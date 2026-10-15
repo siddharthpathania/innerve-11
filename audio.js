@@ -2,7 +2,8 @@
    window.SFX.start(withSound), .toggle(), .play(name), .on */
 window.SFX = (() => {
   let ctx = null, master, wet, comp, noiseBuf, analyser, ambBus, on = false, ambientStarted = false;
-  let music = null, hasMusic = false, lvl = 0, lvlAt = 0, tdata = null;
+  let pendingIdx = null, pendingAt = 0;
+  let music = null, musicGain = null, hasMusic = false, lvl = 0, lvlAt = 0, tdata = null;
   const MUSIC_SRC = "assets/audio/theme.mp3";   // drop a track you own here (e.g. the Demon Slayer OST)
   fetch(MUSIC_SRC, { method: "HEAD" }).then((r) => { hasMusic = r.ok && /audio|mpeg|octet/.test(r.headers.get("content-type") || ""); }).catch(() => {});
   const last = {};
@@ -69,9 +70,9 @@ window.SFX = (() => {
     // koto plucks, forever
     const pluckLoop = () => {
       if (!ctx) return;
-      if (on) {
+      if (on && !music) {
         const n = SCALE[Math.floor(Math.random() * SCALE.length)];
-        const amb = music ? .25 : 1;
+        const amb = 1;
         koto(n, .14 * amb);
         if (Math.random() < .35) setTimeout(() => koto(SCALE[Math.floor(Math.random() * SCALE.length)], .1 * amb), 180 + Math.random() * 260);
       }
@@ -175,14 +176,36 @@ window.SFX = (() => {
       ambient();
       if (hasMusic && !music) {
         music = new Audio(MUSIC_SRC); music.loop = true; music.preload = "auto";
-        const src = ctx.createMediaElementSource(music), mg = ctx.createGain(); mg.gain.value = .85;
-        src.connect(mg).connect(master);
-        ambBus.gain.value = .3;
+        const src = ctx.createMediaElementSource(music); musicGain = ctx.createGain(); musicGain.gain.value = .85;
+        src.connect(musicGain).connect(master);
+        ambBus.gain.value = .12;
         document.documentElement.classList.add("has-music");
       }
       api.set(withSound);
     },
     get hasMusic() { return !!music; },
+    get musicEl() { return music; },
+    // medley navigation (song start times live in data.js → INNERVE.music.starts)
+    track() {
+      const st = (window.INNERVE && INNERVE.music && INNERVE.music.starts) || [0];
+      if (!music) return { index: 0, count: st.length };
+      let i = 0; st.forEach((s, k) => { if (music.currentTime >= s - .5) i = k; });
+      return { index: i, count: st.length, title: (INNERVE.music.titles || [])[i] || "" };
+    },
+    nextTrack(dir = 1) {
+      if (!music || !musicGain) return;
+      const st = INNERVE.music.starts;
+      // count from the song we're heading to if a jump is still settling
+      const from = pendingIdx != null && performance.now() - pendingAt < 1500 ? pendingIdx : api.track().index;
+      const idx = (from + dir + st.length) % st.length;
+      pendingIdx = idx; pendingAt = performance.now();
+      const t = ctx.currentTime;
+      musicGain.gain.cancelScheduledValues(t);
+      musicGain.gain.setValueAtTime(0, t);
+      musicGain.gain.linearRampToValueAtTime(.85, t + .7);
+      music.currentTime = st[idx] + .2;
+      return idx;
+    },
     // 0..1 loudness of everything playing (score + SFX + music) — drives the visuals
     level() {
       if (!on || !analyser) return 0;

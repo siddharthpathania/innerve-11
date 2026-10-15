@@ -6,9 +6,10 @@ Contains official Demon Slayer artwork — keep this repo private.
 ## Run
 
 ```sh
-python3 -m http.server 8000
+npx http-server -p 8000 -c-1
 # open http://localhost:8000
 ```
+(Use a server with HTTP Range support — `python3 -m http.server` can't seek inside the music file, so song skipping breaks.)
 
 Static site, no build step. GSAP, Lenis and three.js load from CDNs.
 
@@ -28,8 +29,10 @@ Static site, no build step. GSAP, Lenis and three.js load from CDNs.
 
 ## Music
 
-Drop a track you own at `assets/audio/theme.mp3` — it plays after "Enter with sound",
-the generated score ducks under it, and the visuals pulse to it. It is git-ignored.
+`assets/audio/theme.mp3` is a 7-song Demon Slayer medley (git-ignored — it stays on your machine).
+It plays after "Enter with sound", the generated score ducks under it, the visuals pulse to it,
+and the ♪ player in the nav skips between songs. Song start times (and optional titles) live in
+`data.js` → `music`.
 
 ## Secrets
 
